@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tvaika 27 apskate</title>
+<style>
+  :root {
+    --navy: #1e3a5f;
+    --navy-dark: #14283f;
+    --navy-light: #2c5282;
+    --accent: #3b6ea5;
+    --surface: #ffffff;
+    --surface-2: #f4f6f8;
+    --surface-3: #e9edf1;
+    --border: #d7dce2;
+    --text: #1a2733;
+    --text-secondary: #52616f;
+    --text-muted: #8a97a3;
+    --text-danger: #c0392b;
+    --fill-danger: #c0392b;
+    --radius: 8px;
+    --shadow-sm: 0 1px 2px rgba(20,40,63,0.06);
+    --shadow-md: 0 2px 10px rgba(20,40,63,0.10);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--surface-3); }
+  body {
+    margin: 0;
+    padding: 0 0 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--surface-3);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  #wrap { background: transparent; }
+  #topbar {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    color: #fff;
+    padding: 16px 18px 14px;
+    margin-bottom: 14px;
+  }
+  #topbar h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  #topbar .sub {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: rgba(255,255,255,0.68);
+    font-weight: 400;
+  }
+  #content { padding: 0 16px; }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 14px;
+  }
+  .tab {
+    flex: 1;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding: 9px 10px;
+    box-shadow: none;
+  }
+  .tab.active {
+    background: var(--navy);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  button:active { opacity: 0.75; }
+  button.btn-primary {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+  button.btn-ghost {
+    background: var(--surface-2);
+    box-shadow: none;
+  }
+  .lang-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    box-shadow: none;
+  }
+  .lang-btn.active {
+    background: #fff;
+    color: var(--navy);
+    border-color: #fff;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+  }
+  input, textarea {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--navy-light); outline-offset: -1px; }
+  #imgbox { box-shadow: var(--shadow-sm); }
+  #zoomLbl { color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div id="wrap" style="position:relative;width:100%;max-width:700px;margin:0 auto;">
+<div id="topbar">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+    <div>
+      <h2>Tvaika 27 · BMGS</h2>
+      <p class="sub" id="subtitleText">Interaktīvā objekta karte — apskate un piezīmju uzskaite</p>
+    </div>
+    <div style="display:flex;gap:4px;flex-shrink:0;">
+      <button id="langLV" type="button" class="lang-btn">LV</button>
+      <button id="langRU" type="button" class="lang-btn active">RU</button>
+    </div>
+  </div>
+</div>
+<div id="content">
+<div class="tabs">
+<button id="tabMap" class="tab active">Karte</button>
+<button id="tabList" class="tab">Saraksts (<span id="cnt">0</span>)</button>
+</div>
+<div class="tabs" id="layerTabs" style="margin-top:6px;">
+<button id="layerOccupancy" class="tab active">Aizņemtība</button>
+<button id="layerParcels" class="tab">Zemesgabali</button>
+</div>
+
+<div id="mapView">
+<p id="helperText" style="font-size:13px;color:var(--text-secondary);margin:0 0 10px;">Nospiediet uz objekta numura — atvērsies datu kartīte.</p>
+<div id="zoomRow" style="display:flex;gap:6px;margin-bottom:8px;align-items:center;">
+<button id="zoomOut" class="btn-ghost" style="flex:0 0 auto;padding:8px 14px;">−</button>
+<button id="zoomIn" class="btn-ghost" style="flex:0 0 auto;padding:8px 14px;">+</button>
+<button id="zoomReset" class="btn-ghost" style="flex:0 0 auto;padding:8px 12px;">Atiestatīt</button>
+<span id="zoomLbl" style="font-size:12px;color:var(--text-muted);margin-left:4px;">100%</span>
+<label style="margin-left:auto;font-size:12px;color:var(--text-secondary);display:none;">
+<input type="checkbox" id="showNums" style="width:auto;padding:0;"> <span id="numsLabel">Numuri</span>
+</label>
+</div>
+<div id="imgbox" style="position:relative;width:100%;border-radius:var(--radius);overflow:hidden;border:0.5px solid var(--border);touch-action:none;">
+<div id="panzoom" style="position:relative;transform-origin:0 0;">
+<img id="mapimg" src="" style="width:100%;height:auto;" />
+<div id="pins"></div>
+<div id="parcelPins" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;"></div>
+<div id="numlayer"></div>
+</div>
+</div>
+</div>
+
+<div id="listView" style="display:none;">
+<div id="notesListSection">
+<div id="entries"></div>
+<div id="emptyState" style="text-align:center;padding:2rem 0;color:var(--text-muted);font-size:14px;">Pagaidām nav piezīmju. Dodieties uz karti un atzīmējiet ēku.</div>
+<button id="copyAll" class="btn-primary" style="width:100%;margin-top:12px;">Kopēt sarakstu</button>
+</div>
+<div id="parcelsListSection" style="display:none;">
+<button id="newParcelBtn" class="btn-primary" style="width:100%;margin-bottom:10px;">+ Jauns zemesgabals</button>
+<div id="parcelEntries"></div>
+<button id="parcelCopyAll" class="btn-primary" style="width:100%;margin-top:12px;">Kopēt visus zemesgabalu punktus</button>
+</div>
+</div>
+</div>
+
+<div id="infoOverlay" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(20,40,63,0.55);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
+<div id="infoCard" class="card" style="padding:1.1rem;width:100%;max-width:400px;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<div id="infoBody"></div>
+<div style="display:flex;gap:8px;margin-top:14px;">
+<button id="infoClose" class="btn-ghost" style="flex:1;">Aizvērt</button>
+<button id="infoNote" class="btn-primary" style="flex:1;">Piezīme</button>
+</div>
+<span id="infoPending" style="display:none;"></span>
+</div>
+</div>
+
+<div id="parcelOverlay" style="display:none;position:fixed;left:0;right:0;bottom:0;top:auto;z-index:1000;background:transparent;padding:0;box-sizing:border-box;pointer-events:none;">
+<div class="card" style="pointer-events:auto;padding:0.85rem 1.1rem;width:100%;max-width:600px;margin:0 auto;max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(20,40,63,0.28);">
+<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 10px;"></div>
+<div id="parcelBody"></div>
+<p id="parcelGpsStatus" style="font-size:12px;color:var(--text-muted);margin:8px 0;"></p>
+<button id="parcelAddPoint" class="btn-primary" style="width:100%;margin-top:4px;">+ Pievienot punktu (GPS)</button>
+<button id="parcelLoadOutline" class="btn-ghost" style="width:100%;margin-top:8px;display:none;">Загрузить контур для правки</button>
+<div style="display:flex;gap:8px;margin-top:8px;">
+<button id="parcelUndo" class="btn-ghost" style="flex:1;">↩ Atcelt pēdējo</button>
+<button id="parcelClose" class="btn-ghost" style="flex:1;">Aizvērt</button>
+</div>
+<button id="parcelDelete" class="btn-ghost" style="width:100%;margin-top:8px;display:none;color:var(--text-danger);border-color:var(--text-danger);">Dzēst zemesgabalu</button>
+<span id="parcelPending" style="display:none;"></span>
+</div>
+</div>
+
+<div id="modalOverlay" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(20,40,63,0.5);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
+<div class="card" style="padding:1.25rem;width:100%;max-width:340px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<p id="modalTitle" style="font-size:13px;color:var(--text-secondary);margin:0 0 4px;">Tuvākais objekts</p>
+<p id="modalSub" style="font-size:12px;color:var(--text-secondary);margin:0 0 6px;">Izvēlieties objektu (pēc tuvuma nospiešanas punktam):</p>
+<div id="codeChoices" style="display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;"></div>
+<p id="modalCode" style="font-size:12px;color:var(--text-muted);margin:0 0 8px;"></p>
+<p id="gpsStatus" style="font-size:12px;color:var(--text-muted);margin:0 0 6px;">Nosakām GPS…</p>
+<input type="text" id="manualGeo" placeholder="Vai ievadiet koordinātas manuāli: 56.949540, 24.105180" style="width:100%;margin-bottom:10px;box-sizing:border-box;font-size:12px;" />
+<input type="text" id="codeOverride" placeholder="Objekta kods, ja nav pareizs" style="width:100%;margin-bottom:8px;box-sizing:border-box;" />
+<div style="position:relative;">
+<textarea id="noteInput" placeholder="Ko redzējāt — stāvoklis, piezīmes" rows="4" style="width:100%;box-sizing:border-box;resize:vertical;padding-right:44px;"></textarea>
+<button id="micBtn" type="button" aria-label="Balss piezīme" style="position:absolute;right:6px;bottom:6px;width:34px;height:34px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;">
+🎤
+</button>
+</div>
+<p id="micStatus" style="font-size:12px;color:var(--text-muted);margin:4px 0 0;display:none;"></p>
+<p id="errMsg" style="display:none;color:var(--text-danger);font-size:13px;margin:6px 0 0;">Ierakstiet piezīmi</p>
+<div style="display:flex;gap:8px;margin-top:12px;">
+<button id="cancelBtn" class="btn-ghost" style="flex:1;">Atcelt</button>
+<button id="saveBtn" class="btn-primary" style="flex:1;">Saglabāt</button>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const DOTS = {"031": [810, 2006], "072": [554, 1804], "071": [541, 1819], "059": [486, 1422], "024": [693, 1593], "055": [428, 1471], "020": [859, 1453], "062": [351, 1541], "029": [481, 1363], "019": [495, 1277], "063": [334, 1300], "018": [566, 1270], "049": [486, 1256], "016": [769, 1201], "015": [785, 1123], "012": [754, 954], "017": [474, 1104], "014": [981, 1080], "030": [616, 1012], "064": [319, 988], "013": [904, 1086], "070": [908, 880], "069": [887, 823], "009": [403, 917], "037": [680, 872], "010": [761, 819], "040": [395, 763], "036": [729, 777], "008": [336, 731], "042": [511, 673], "003": [665, 660], "006": [566, 596], "068": [631, 414], "001": [422, 407], "065": [237, 359], "066": [253, 229], "032": [304, 269], "067": [382, 174], "021": [665, 1420], "022": [675, 1369], "023": [382, 1467], "025": [793, 1928], "051": [564, 1240], "054": [777, 1357], "073": [931, 1530], "074": [684, 675], "011": [711, 888], "033": [566, 360], "052": [566, 1222], "053": [967, 1319]};
+const BOX = {"053": {"lab": [904, 1301, 93, 36], "tab": [997, 1301, 25, 36]}, "033": {"lab": [504, 341, 93, 36], "tab": [597, 341, 25, 36]}, "001": {"lab": [369, 387, 73, 36], "tab": [442, 387, 25, 36]}, "073": {"lab": [911, 1511, 89, 36], "tab": [1001, 1511, 25, 36]}, "013": {"lab": [851, 1067, 73, 36], "tab": [924, 1067, 25, 36]}, "024": {"lab": [640, 1575, 73, 36], "tab": [712, 1575, 25, 36]}, "014": {"lab": [961, 1061, 73, 36], "tab": [1033, 1061, 25, 36]}, "017": {"lab": [525, 1119, 69, 36], "tab": [594, 1119, 25, 36]}, "074": {"lab": [621, 657, 93, 36], "tab": [714, 657, 25, 36]}, "018": {"lab": [530, 1287, 101, 36], "tab": [632, 1287, 25, 36]}, "025": {"lab": [747, 1909, 69, 36], "tab": [816, 1909, 25, 36]}, "052": {"lab": [503, 1203, 93, 36], "tab": [596, 1203, 25, 36]}, "016": {"lab": [712, 1183, 79, 36], "tab": [791, 1183, 25, 36]}, "012": {"lab": [733, 936, 61, 36], "tab": [794, 936, 25, 36]}, "019": {"lab": [242, 1307, 61, 36], "tab": [304, 1307, 25, 36]}, "006": {"lab": [553, 578, 61, 36], "tab": [615, 578, 25, 36]}, "030": {"lab": [595, 993, 57, 36], "tab": [652, 993, 25, 36]}, "015": {"lab": [746, 1105, 83, 36], "tab": [829, 1105, 25, 36]}, "009": {"lab": [214, 876, 61, 36], "tab": [276, 876, 25, 36]}, "071": {"lab": [445, 1888, 64, 36], "tab": [509, 1888, 25, 36]}, "010": {"lab": [711, 800, 101, 36], "tab": [813, 800, 25, 36]}, "069": {"lab": [887, 741, 95, 36], "tab": [982, 742, 25, 36]}, "023": {"lab": [216, 1439, 64, 36], "tab": [280, 1439, 25, 36]}, "042": {"lab": [486, 664, 61, 36], "tab": [547, 664, 25, 36]}, "021": {"lab": [571, 1430, 61, 36], "tab": [633, 1430, 25, 36]}, "029": {"lab": [239, 1351, 61, 36], "tab": [301, 1351, 25, 36]}, "020": {"lab": [821, 1435, 87, 36], "tab": [908, 1435, 25, 36]}, "036": {"lab": [694, 749, 71, 36], "tab": [765, 749, 25, 36]}, "022": {"lab": [511, 1348, 101, 36], "tab": [613, 1348, 25, 36]}, "070": {"lab": [887, 862, 91, 36], "tab": [979, 862, 25, 36]}, "003": {"lab": [705, 578, 54, 36], "tab": [759, 578, 25, 36]}, "008": {"lab": [114, 750, 84, 36], "tab": [199, 750, 25, 36]}, "040": {"lab": [196, 790, 71, 36], "tab": [267, 790, 25, 36]}, "011": {"lab": [685, 871, 63, 36], "tab": [747, 871, 25, 36]}, "051": {"lab": [558, 1249, 59, 36], "tab": [617, 1249, 25, 36]}, "049": {"lab": [230, 1219, 59, 36], "tab": [289, 1219, 25, 36]}, "059": {"lab": [230, 1395, 69, 36], "tab": [299, 1395, 25, 36]}, "054": {"lab": [754, 1340, 59, 36], "tab": [813, 1340, 25, 36]}, "055": {"lab": [202, 1483, 93, 36], "tab": [295, 1483, 25, 36]}, "037": {"lab": [542, 802, 59, 36], "tab": [601, 802, 25, 36]}, "031": {"lab": [800, 1947, 69, 36], "tab": [869, 1947, 25, 36]}, "072": {"lab": [541, 1845, 59, 36], "tab": [599, 1845, 25, 36]}, "062": {"lab": [151, 1537, 69, 36], "tab": [220, 1537, 25, 36]}, "063": {"lab": [149, 1263, 69, 36], "tab": [218, 1263, 25, 36]}, "064": {"lab": [121, 968, 69, 36], "tab": [190, 968, 25, 36]}, "068": {"lab": [569, 297, 69, 36], "tab": [638, 297, 25, 36]}, "065": {"lab": [124, 350, 69, 36], "tab": [193, 350, 25, 36]}, "066": {"lab": [86, 191, 69, 36], "tab": [154, 191, 25, 36]}, "032": {"lab": [74, 251, 93, 36], "tab": [167, 251, 25, 36]}, "067": {"lab": [383, 190, 69, 36], "tab": [452, 190, 25, 36]}};
+const META_LV = {"055": {"kad": "0100 068 0261 055", "name": "Nostādinātājs", "area": 12.6, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Lietus ūdens uztvērējs.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "059": {"kad": "0100 068 0261 059", "name": "Apsardzes ēka", "area": 19, "year": 1986, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla vienstāva ēka sliktā stāvoklī.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "042": {"kad": "0100 068 0261 042", "name": "Nojume", "area": 173.1, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Viegla ražošanas nojume.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "051": {"kad": "0100 068 0261 051", "name": "Šķūnis", "area": 23.5, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Šķūnis.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "049": {"kad": "0100 068 0261 049", "name": "Šķūnis", "area": 22.2, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Šķūnis.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "003": {"kad": "0100 068 0261 003", "name": "", "area": 57.9, "year": null, "tc": null, "fe": null, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "", "note": "Objekts nav apskatīts. Iepriekš piezīme no 03.09.2026 kļūdaini bija ierakstīta zem šī koda — pēc apsekotāja apstiprinājuma tā attiecas uz objektu 012 (korpuss 27 k-3) un pārnesta uz turieni. Iepriekšējā vērtējuma pārskatā objekts 003 nav minēts, nosaukums un funkcija nav zināma, pēc reģistra platība 57,9 m². Nepieciešama identifikācija dabā.", "rnote": ""}, "054": {"kad": "0100 068 0261 054", "name": "Šķūnis", "area": 14, "year": null, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Šķūnis.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m).", "rnote": ""}, "037": {"kad": "0100 068 0261 037", "name": "Šķūnis", "area": 7.8, "year": null, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Kapitāla šķūnis.", "note": "Apskate 03.09.2026. Šķūnis vai neliela transformatoru būda. Ķieģeļu būve, elektrība pievadīta noteikti; iespējamas citas komunikācijas — nepieciešama pārbaude. ⚠️ GPS ļoti neprecīzs (±93 m), novietojums nav precizēts. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "040": {"kad": "0100 068 0261 040", "name": "Transformatoru telpa", "area": 42.1, "year": null, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Transformatoru apakšstacija.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "031": {"kad": "0100 068 0261 031", "name": "Apsardzes telpa", "area": 7.1, "year": 1990, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Apsardzes telpa.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "009": {"kad": "0100 068 0261 009", "name": "Noliktava", "area": 323.3, "year": 1962, "tc": 2, "fe": 2, "rent": "Jā", "tenant": "SIA \"Luxury Marine Developments\" (N18152)", "rarea": 500, "insp": null, "desc": "Kapitāla vienstāva ēka sliktā stāvoklī.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Konflikta nav (tas pats gadījums, kas ar objektu 001 — sk. pārskatu \"Konflikt_001_009_razbor\"). Līdz 08.04.2022 un pašlaik ēka ir Luxury Marine Developments īres sastāvā (N18152). Vienošanās Nr.4 no 07.03.2022 nostiprina ēkas 001+009 pie Luxury Marine Developments no 08.04.2022 (nevis iepriekš izslēgto 017, kas nodota Storage Management). Platība pēc reģistra — 323,3 m², pēc līguma — 500 m² — neatbilstība. Likme ietilpst kopējā maksājumā 3894,85 €/mēn par 001+009 (bez PVN)."}, "022": {"kad": "0100 068 0261 022", "name": "Darbnīca", "area": 79.2, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla vienstāva darbnīcas ēka sliktā stāvoklī.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m).", "rnote": ""}, "001": {"kad": "0100 068 0261 001", "name": "Ražošanas korpuss", "area": 3390.6, "year": 1961, "tc": 3, "fe": 3, "rent": "Jā", "tenant": "SIA \"Luxury Marine Developments\" (N18152)", "rarea": 2507.4, "insp": "03.09.2026", "desc": "Kapitāla 3 stāvu ēka. Ražošanas platības ar augstumu 10,8 m, tilta tipa celtnis 6,3 t. Grīdas remontētas, logi daļēji nomainīti. Centrālās apkures nav. Biroja daļa sliktā stāvoklī. Daļēji izīrēta.", "note": "Apskate 03.09.2026. Liels ražošanas cehs, lielākais teritorijā. No dienvidu puses piebūve apm. 8×8 m. Pretējā pusē lieli metāla vārti apm. 4×6 m. Ēka sastāv no paša ceha un biroja daļas — iespējams, tāpēc izīrēts nav viss, bet tikai daļa (sakrīt ar iepriekšējā vērtējuma datiem: \"daļēji izīrēts\"). Apskates GPS punkti: 57.014703, 24.119793 (±64 m) un 57.014135, 24.120089 (±9 m). Otrā piezīme tika ierakstīta zem koda 067 (piestātne) — pēc apraksta un koordinātām attiecas uz šo objektu. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Konflikta nav (pārbaudīts pēc datumiem, sk. pārskatu \"Konflikt_001_009_razbor\"). Līdz 08.04.2022 ēka bija Luxury Marine Developments īres sastāvā (N18152, kopš 2018.g.). 07.03.2022 parakstīta Vienošanās Nr.4 pie N18152: no 08.04.2022 īres objekts tiek samazināts līdz ēkām 001+009 (ēka 017 tiek izslēgta atsevišķi un nodota Storage Management pēc N22057). Platība pēc reģistra — 3390,6 m², pēc līguma — 2507,4 m² — neatbilstība, atsevišķi jāpārbauda. Likme ietilpst kopējā maksājumā 3894,85 €/mēn par 001+009 (bez PVN), depozīts 26 853,72 €."}, "006": {"kad": "0100 068 0261 006", "name": "Armatūras cehs", "area": 538.2, "year": 1961, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Kapitāla vienstāva ēka, griesti 7,8 m. Celtspējas celtnis. Apkure lokāla. Logi daļēji jauni.", "note": "Apskate 03.09.2026. Ķieģeļu ēka, apmesta, apmetums daļēji nobiris, bet kopumā stāvoklis labs. Plastmasas logi. No dienvidu puses metāla vārti apm. 4×6 m (augšējā daļa arī atveras) — iespējams, paredzēti otram līmenim. GPS: 57.013962, 24.120175 (±4 m) — novietojums kartē precizēts pēc šī punkta. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "008": {"kad": "0100 068 0261 008", "name": "Sūkņu stacija", "area": 43.2, "year": 1992, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla vienstāva būve.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "010": {"kad": "0100 068 0261 010", "name": "Darbnīca", "area": 258.4, "year": 1989, "tc": 3, "fe": 3, "rent": "Jā", "tenant": "SIA \"Starts-Rīga Plus\"", "rarea": 210, "insp": "03.09.2026", "desc": "Kapitāla vienstāva ēka, augstums 6 m. Betona grīda labā stāvoklī, centrālā apkure. Izīrēta.", "note": "Apskate 03.09.2026 (pēc apsekotāja teiktā — darbnīca): ēka vidējā tehniskā stāvoklī, betona, jumts labā stāvoklī. ⚠️ GPS punkts ļoti neprecīzs (±76 m), objekta novietojums pēc šīs piezīmes nav precizēts. Iepriekšējā vērtējuma datos objekts minēts kā kompresoru telpa (258,4 m²) — nepieciešama funkcijas pārbaude. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Līgums Nr.126S102012 no 21.08.2012, darbojas ar automātisku pagarinājumu. Vienošanās Nr.1 (27.12.2021) — komunālo maksājumu aprēķina formulas tehniska korekcija. Vienošanās Nr.2 (31.07.2026) — likme mainīta uz 900 €/mēn + PVN no 01.08.2026 (bija ~328 €/mēn). ⚠️ No BMGS puses Vienošanos Nr.2 parakstījusi maksātnespējas procesa administratore (Marita Kataja-Paegle) — BMGS atrodas maksātnespējas procesā. Platība pēc reģistra — 258,4 m², pēc līguma — 210 m² — neatbilstība."}, "012": {"kad": "0100 068 0261 012", "name": "Administratīvā ēka", "area": 793.8, "year": 1964, "tc": 4, "fe": 4, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Kapitāla 2 stāvu ēka labā stāvoklī, centrālā gāzes apkure. Aizņem īpašnieks.", "note": "Administratīvā ēka (korpuss ar adreses uzrakstu \"27 k-3\"), uz dienvidiem no ūdenstorņa (011), starp angāru 030 un korpusu 013. Piederība objektam 012 apstiprināta ar apsekotāja 03.09.2026. Apskate 02.09.2026: jauni stikla pakešu logi, svaigs apmetums — nesena renovācija; elektrība, apgaismojums, ūdens — pieejami; ēka labi atjaunota, kārtīga, ar video novērošanu; atsevišķa papildu ieeja 2. stāvā. Apskate 03.09.2026: ēka apmesta, jauni plastmasas logi, jauni notekcaurules. Apskates GPS punkti: 57.012521, 24.121495 (±18 m) un 57.012557, 24.121389 (±9 m) — atšķirība apm. 7 m, t.i., abas piezīmes par vienu būvi. Novietojums kartē precizēts pēc punkta ar precizitāti ±9 m.", "rnote": ""}, "013": {"kad": "0100 068 0261 013", "name": "Ražošanas korpuss", "area": 3028.6, "year": 1987, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla vienstāva ēka, griesti 13,8 m. Betona ražošanas jaudas, tilta celtņi. Vārti jauni, logi daļēji nomainīti. Biroja telpas labā stāvoklī.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m).", "rnote": ""}, "014": {"kad": "0100 068 0261 014", "name": "Ražošanas korpuss", "area": 2859, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla vienstāva ēka, griesti 13,8 m. Betona ražošana, tilta celtņi. Vārti jauni, logi daļēji nomainīti.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m).", "rnote": ""}, "015": {"kad": "0100 068 0261 015", "name": "Ēdnīca", "area": 338.5, "year": 1975, "tc": 4, "fe": 4, "rent": "Jā", "tenant": "Aplauss", "rarea": null, "insp": "02.09.2026", "desc": "Kapitāla vienstāva ēka labā stāvoklī. Daļa — birojs, daļa — ēdnīca, ir katlu māja.", "note": "Apskate 02.09.2026. Ēdnīca. Ķieģeļu ēka labā stāvoklī, jauni plastmasas logi, ir gāzes pieslēgums (atbilst katlu mājas esamībai pēc iepriekšējā vērtējuma datiem). Jumts vizuāli labā stāvoklī. Apskates GPS punkti: 57.011885, 24.121494 (±22 m). Piesaiste precizēta dabā 03.09.2026; iepriekš piezīme bija zem koda 012. Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m).", "rnote": "Izīrēta \"Aplauss\", likme 100 €/mēn. Avots: lietotāja dati, 10.09.2026."}, "016": {"kad": "0100 068 0261 016", "name": "Sadzīves korpuss", "area": 852.9, "year": 1967, "tc": 4, "fe": 4, "rent": "Daļēji", "tenant": "SIA Riga Towage Company; AS \"PKL Flote\"", "rarea": 58.9, "insp": "02.09.2026", "desc": "Kapitāla 3 stāvu ēka. 1. stāvs — biroji labā stāvoklī; 2. — ģērbtuves un sanmezgli labā stāvoklī; 3. — analoģiskas telpas vidējā stāvoklī.", "note": "Apskate 02.09.2026. Trīsstāvu ķieģeļu ēka, piekļaujas ēdnīcai (015) no dienvidiem, ar nelielu caurlaides telpu un piebūvi. Plastmasas stikla pakešu logi. Kopumā stāvoklis labs. Pievadīta gāze, ūdens, apkure. Jumts no zemes nav pārskatāms — nepieciešama atsevišķa apsekošana. Iespējams, nepieciešami nelieli kosmētiskie darbi pie fasādes (nodilušas sliekšņi). Apskates GPS punkti: 57.011957, 24.121199 (±14 m) un 57.011790, 24.121433 (±21 m). Piesaiste precizēta dabā 03.09.2026; iepriekš piezīmes bija zem koda 015 un bez numura. Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m).", "rnote": "Apzīmējums 016 — vienota ēka, izīrēta pa daļām dažādiem īrniekiem. Telpas Nr.8, Nr.15 (37,3 m²) — Līgums Nr.11RTC2022 no 22.11.2022, SIA Riga Towage Company, 223,80 €/mēn bez PVN, termiņš līdz 31.12.2023 ar automātisku pagarinājumu par 12 mēn. Telpa Nr.7 (21,6 m²) — Līgums Nr.11PKL2022 no 22.11.2022, AS \"PKL Flote\", 129,60 €/mēn bez PVN, tāds pats termiņš un pagarinājums. Kopā izīrēti 58,9 m² no 852,9 m² pēc reģistra — pārējā ēkas platība nav pārbaudīta."}, "017": {"kad": "0100 068 0261 017", "name": "Noliktava", "area": 2156.8, "year": 1969, "tc": 3, "fe": 4, "rent": "Jā", "tenant": "SIA \"Storage Management\"", "rarea": 2156.8, "insp": null, "desc": "Kapitāla vienstāva ēka, pilnībā remontēta, griesti 7,8 m. Gāzes apkure no īrnieka katla. Izīrēta.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Konflikta nav — ķēde tīra (pārbaudīts pēc datumiem, sk. pārskatu \"Konflikt_001_009_razbor\"). Līdz 07.04.2022 ēka bija Luxury Marine Developments īrē (N18152). 07.04.2022 parakstīts pieņemšanas-nodošanas akts — Luxury Marine Developments fiziski atgriež ēku BMGS (pamats — Vienošanās Nr.4 no 07.03.2022, ēka izslēgta no tās īres objekta no 08.04.2022). 08.04.2022 BMGS izīrē to pašu ēku jaunajam īrniekam Storage Management pēc līguma N22057. Secība dokumentāli apstiprināta, dublēšanās nav. Likme 2,20 €/m² = 4744,96 €/mēn nominālā, 100% atlaide (V1→V3→V4) vismaz līdz 31.12.2024 — īrnieks maksā tikai komunālos maksājumus."}, "018": {"kad": "0100 068 0261 018", "name": "Darbnīca", "area": 1093.4, "year": 1967, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Vienstāva ražošanas ēka, griesti 8,3 m, uzstādīts tilta celtnis. Centrālās apkures nav. Stāvoklis vidējs / slikts.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Izmanto uzņēmuma pašu vajadzībām (netiek izīrēts)."}, "019": {"kad": "0100 068 0261 019", "name": "Administratīvā ēka", "area": 551.5, "year": 1967, "tc": 4, "fe": 4, "rent": "Jā", "tenant": "SIA \"Storage Management\"", "rarea": 485, "insp": null, "desc": "Kapitāla 3 stāvu ēka, remonts veikts pirms apm. 4 gadiem. Elektriskā apkure. Stāvoklis labs, izīrēta.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Līgums N22057, Vienošanās Nr.1 no 08.04.2022. Likme 4,00 €/m² = 1940,00 €/mēn nominālā, 100% atlaide vismaz līdz 31.12.2024. ⚠️ Platība pēc reģistra — 551,5 m², pēc līguma — 485 m² — neatbilstība, jāpārbauda."}, "020": {"kad": "0100 068 0261 020", "name": "Bumbu patvertne", "area": 107.7, "year": 1978, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Bumbu patvertne. Izīrēšanai nav piemērota.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m).", "rnote": ""}, "021": {"kad": "0100 068 0261 021", "name": "Noliktava", "area": 172.2, "year": 1992, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla vienstāva noliktavas ēka, divas noliktavas telpas 5,2 m augstumā. Stāvoklis slikts.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m). Iepriekšējais punkts kļūdaini bija uz lielā korpusa 024.", "rnote": ""}, "024": {"kad": "0100 068 0261 024", "name": "Ražošanas ēka", "area": 3017.4, "year": 1972, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "3 stāvu ēka bez centrālās apkures. 1. stāvs — ražošana, augstums 9,3 m, uzstādīts tilta celtnis, vārti jauni, logi daļēji nomainīti. 2. stāvs — remontēti biroji. 3. stāvs — biroji sliktā tehniskā stāvoklī.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026 (plāna piesaiste attēlam, kļūda apm. 2 m). Objekts — liels tumšs korpuss uz rietumiem no krāna sliežu ceļiem (073).", "rnote": ""}, "025": {"kad": "0100 068 0261 025", "name": "Noliktava", "area": 1022.3, "year": 1985, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla 2 stāvu ēka, brīva, centrālās apkures nav, stāvoklis slikts. 1. stāvs — ražošana 6,8 m augstumā, 2. — biroji. Ārpusē rampa.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "029": {"kad": "0100 068 0261 029", "name": "Garāža", "area": 132.2, "year": 1990, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Garāžu boksi 2,4 m augstumā. Izīrēšanai nav piemēroti.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "030": {"kad": "0100 068 0261 030", "name": "Angārs", "area": 453, "year": 1990, "tc": 3, "fe": 3, "rent": "Jā", "tenant": "SIA \"Latitude Chemicals\"", "rarea": 453, "insp": null, "desc": "Angāra tipa noliktavas ēka, vārti jauni. Centrālās apkures nav, stāvoklis vidējs.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Līgums N21170 no 23.11.2021. Likme 907,05 €/mēn bez PVN (fiksēta summa, ne par m²), 100% atlaide vismaz līdz 31.12.2024 (papildvienošanās V1→V2→V3)."}, "032": {"kad": "0100 068 0261 032", "name": "Atklāts noliktavas laukums", "area": null, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Atklāts noliktavas laukums sliktā stāvoklī, celtņu nav.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "036": {"kad": "0100 068 0261 036", "name": "Transformatoru apakšstacija", "area": 100.7, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Kapitāla vienstāva transformatoru apakšstacijas ēka.", "note": "Apskate 03.09.2026. Transformatoru būda — funkcija apstiprināta. ⚠️ GPS ļoti neprecīzs (±78 m), novietojums nav precizēts. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "063": {"kad": "0100 068 0261 063", "name": "Piestātne DS-9", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Piestātne DS-9. Pēc Rīgas brīvostas piestātņu reģistra datiem (ostas kapteiņa rīkojums Nr.14, 20.01.2020, 2. pielikums, 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): piestātnes garums 105,00 m, kuģa maksimālā iegrime pie piestātnes 4,8 m, kuģa maksimālais garums 90,0 m (izmantojot arī DS-10 akvatoriju — līdz 130 m). Specializācija: ģenerālkravas un beramkravas (izņemot akmeņogles).", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "064": {"kad": "0100 068 0261 064", "name": "Piestātne DS-10", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Piestātne DS-10. Pēc Rīgas brīvostas piestātņu reģistra datiem (ostas kapteiņa rīkojums Nr.14, 20.01.2020, 2. pielikums, 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): piestātnes garums 100,00 m, kuģa maksimālā iegrime pie piestātnes 5,0 m, kuģa maksimālais garums 90,0 m (izmantojot arī DS-9 akvatoriju — līdz 130 m). Specializācija: ģenerālkravas un beramkravas (izņemot akmeņogles).", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "065": {"kad": "0100 068 0261 065", "name": "Piestātne DS-11a", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Piestātne DS-11a.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "066": {"kad": "0100 068 0261 066", "name": "Piestātne DS-11", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Piestātne DS-11. Pēc Rīgas brīvostas piestātņu reģistra datiem (ostas kapteiņa rīkojums Nr.15, 20.01.2020, 2. pielikums, 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): piestātnes garums 85,00 m, kuģa maksimālā iegrime pie piestātnes 3,5 m, kuģa maksimālais garums 50,0 m. Atļauts tauvot tikai ostas flotes kuģus. Specializācija: īslaicīga/piespiedu rezerves stāvvieta bez aprīkojuma; palīgflotes kuģu piestātne.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "067": {"kad": "0100 068 0261 067", "name": "Piestātne DS-12a", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Piestātne DS-12a.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "068": {"kad": "0100 068 0261 068", "name": "Piestātne DS-12", "area": null, "year": 1961, "tc": 3, "fe": 3, "rent": "Jā", "tenant": "SIA \"OVI\"", "rarea": null, "insp": null, "desc": "Piestātne DS-12. Pēc Rīgas brīvostas piestātņu reģistra datiem (ostas kapteiņa rīkojums Nr.15, 20.01.2020, 2. pielikums, 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): piestātnes garums 150,00 m, kuģa maksimālā iegrime pie piestātnes 2,0 m, kuģa maksimālais garums 30,0 m. Specializācija: īslaicīga/piespiedu rezerves stāvvieta bez aprīkojuma; palīgflotes kuģu piestātne. Izīrēta.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": "Līgums N23074 no 14.03.2023. Kuģu/peldlīdzekļu izvietošana. Likme 500 €/mēn bez PVN. Avots: neatkarīgais nekustamā īpašuma reģistrs, 10.09.2026."}, "069": {"kad": "0100 068 0261 069", "name": "Betona mezgls", "area": 241.2, "year": 2004, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Betona maisīšanas mezgls.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "070": {"kad": "0100 068 0261 070", "name": "Katlu māja", "area": 58, "year": 2004, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Katlu māja.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "071": {"kad": "0100 068 0261 071", "name": "Autobetona maisītāju mazgātava", "area": 258.5, "year": 2006, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Ēka sliktā stāvoklī.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "072": {"kad": "0100 068 0261 072", "name": "Noliktava (mazgāšanas iekārtu uzglabāšana)", "area": 5, "year": 2006, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Ēka sliktā stāvoklī.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "073": {"kad": "0100 068 0261 073", "name": "Krāna sliežu ceļi", "area": 3100, "year": 2006, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Atklāts noliktavas laukums labā stāvoklī, celtņi darba kārtībā.", "note": "Krāna sliežu ceļi / atklāts noliktavas laukums 3100 m², celtņi darba kārtībā. Novietojums kartē labots 03.09.2026 pēc kadastra plāna: josla uz dienvidaustrumiem no laukuma 053, uz austrumiem no korpusa 024. Apskates piezīme no 02.09.2026, iepriekš kļūdaini ierakstīta zem šī koda, pārnesta uz objektu 012 (administratīvā ēka 27 k-3). Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "074": {"kad": "0100 068 0261 074", "name": "Atklāta šķembu un smilts noliktava", "area": 1188, "year": 2005, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Atklāts inertmateriālu uzglabāšanas laukums.", "note": "Apskate 03.09.2026. Betona sastāvdaļu izkraušanas laukums. Betona sienas, betona grīda. Nekā ievērības cienīga. GPS: 57.013597, 24.120882 (±6 m) — novietojums apstiprināts, atšķirība 8 m. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "023": {"kad": "0100 068 0261 023", "name": "Automašīnu mazgātava", "area": 206.6, "year": 1985, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Vienstāva ražošanas ēka, griesti 5,3 m. Apkures nav, stāvoklis slikts.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "062": {"kad": "0100 068 0261 062", "name": "Piestātne", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Piestātne Nr.062 pilda krasta nostiprināšanas būves funkciju.", "note": "Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "011": {"kad": "0100 068 0261 011", "name": "Ūdenstornis", "area": 24.8, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Darbojošās sūkņu stacija. Jumts un logi nomainīti. Izīrēšanai nav piemērota.", "note": "Objekta mūsu reģistrā nebija — pievienots pēc iepriekšējā 2026.g. vērtējuma datiem. Novietojums kartē nav noteikts. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "033": {"kad": "0100 068 0261 033", "name": "Atklāts noliktavas laukums", "area": 3753.5, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Atklāts noliktavas laukums vidējā stāvoklī, ir celtspējas celtnis.", "note": "Novietojums kartē noteikts 03.09.2026 pēc kadastra plāna: laukums gar korpusa 001 austrumu pusi, pie piestātnes DS-12 (068). Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "052": {"kad": "0100 068 0261 052", "name": "Atklāts noliktavas laukums", "area": 992, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Atklāts noliktavas laukums labā stāvoklī, ir celtspējas celtņi.", "note": "Novietojums kartē noteikts 03.09.2026 pēc kadastra plāna: laukums uz rietumiem no korpusa 017, virzienā uz piestātni DS-9 (063). Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "053": {"kad": "0100 068 0261 053", "name": "Atklāts noliktavas laukums", "area": 4032, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Atklāts noliktavas laukums labā stāvoklī, ir celtspējas celtņi.", "note": "Novietojums kartē noteikts 03.09.2026 pēc kadastra plāna: laukums uz austrumiem no būvēm 022/054/021, uz ziemeļiem no joslas 073. Novietojums kartē pārnests no kadastra plāna 04.09.2026: objekta kontūras centrs plānā pārrēķināts uz punktu attēlā, izmantojot piesaisti (kļūda apm. 2 m).", "rnote": ""}, "057": {"kad": "0100 068 0261 057", "name": "Noliktava", "area": 420.7, "year": 1989, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Kapitāla vienstāva ēka, netiek ekspluatēta. Tehniskais stāvoklis neļauj izīrēt.", "note": "⚠️ OBJEKTS NAV APSTIPRINĀTS. Minēts iepriekšējā vērtējuma pārskatā (noliktava 420,7 m², 1989.g., netiek ekspluatēta), taču pārbaudot 03.09.2026 pārbaudītas abas kadastra plāna daļas (ziemeļu un dienvidu, M 1:2000) — objekta ar apzīmējumu 057 plānā nav, numerācijā ir pārrāvums starp 055 un 059. Iespējams, nojaukts vai izslēgts no kadastra uzskaites pēc pārskata sagatavošanas. Kartē nav atzīmēts. Darbība: pieprasīt izrakstu no kadastra par objektu 0100 068 0261 057.", "rnote": ""}};
+const META_RU = {"055": {"kad": "0100 068 0261 055", "name": "Отстойник", "area": 12.6, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Ливневый водоприёмник.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "059": {"kad": "0100 068 0261 059", "name": "Караульное здание", "area": 19, "year": 1986, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное одноэтажное здание в плохом состоянии.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "042": {"kad": "0100 068 0261 042", "name": "Навес", "area": 173.1, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Лёгкий производственный навес.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "051": {"kad": "0100 068 0261 051", "name": "Сарай", "area": 23.5, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Сарай.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "049": {"kad": "0100 068 0261 049", "name": "Сарай", "area": 22.2, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Сарай.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "003": {"kad": "0100 068 0261 003", "name": "", "area": 57.9, "year": null, "tc": null, "fe": null, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "", "note": "Объект не осмотрен. Ранее заметка от 03.09.2026 была ошибочно записана под этим кодом — по подтверждению осматривающего она относится к объекту 012 (корпус 27 k-3) и перенесена туда. В отчёте предыдущей оценки объект 003 отсутствует, наименование и назначение неизвестны, по реестру числится площадь 57,9 м². Требуется идентификация на местности.", "rnote": ""}, "054": {"kad": "0100 068 0261 054", "name": "Сарай", "area": 14, "year": null, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Сарай.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м).", "rnote": ""}, "037": {"kad": "0100 068 0261 037", "name": "Сарай", "area": 7.8, "year": null, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Капитальный сарай.", "note": "Осмотр 03.09.2026. Сарай либо малая трансформаторная будка. Кирпичное строение, электричество подведено однозначно; возможны иные коммуникации — требуется проверка. ⚠️ GPS крайне неточный (±93 м), положение не уточнялось. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "040": {"kad": "0100 068 0261 040", "name": "Трансформаторная", "area": 42.1, "year": null, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Трансформаторная подстанция.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "031": {"kad": "0100 068 0261 031", "name": "Караульное помещение", "area": 7.1, "year": 1990, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Помещение охраны.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "009": {"kad": "0100 068 0261 009", "name": "Склад", "area": 323.3, "year": 1962, "tc": 2, "fe": 2, "rent": "Да", "tenant": "SIA \"Luxury Marine Developments\" (N18152)", "rarea": 500, "insp": null, "desc": "Капитальное одноэтажное здание в плохом состоянии.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Конфликта нет (тот же случай, что и с объектом 001 — см. отчёт «Konflikt_001_009_razbor»). До 08.04.2022 и по настоящее время здание в составе аренды Luxury Marine Developments (N18152). Vienošanās №4 от 07.03.2022 закрепляет здания 001+009 за Luxury Marine Developments с 08.04.2022 (вместо ранее выведенного 017, переданного Storage Management). Площадь по реестру — 323,3 м², по договору — 500 м² — расхождение, отдельная сверка. Ставка входит в общий платёж 3 894,85 €/мес за 001+009 (без НДС)."}, "022": {"kad": "0100 068 0261 022", "name": "Мастерская", "area": 79.2, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное одноэтажное здание мастерской в плохом состоянии.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м).", "rnote": ""}, "001": {"kad": "0100 068 0261 001", "name": "Производственный корпус", "area": 3390.6, "year": 1961, "tc": 3, "fe": 3, "rent": "Да", "tenant": "SIA \"Luxury Marine Developments\" (N18152)", "rarea": 2507.4, "insp": "03.09.2026", "desc": "Капитальное 3-этажное здание. Производственные площади с высотой 10,8 м, мостовой кран 6,3 т. Полы отремонтированы, окна частично заменены. Центрального отопления нет. Офисная часть в плохом состоянии. Частично сдано.", "note": "Осмотр 03.09.2026. Большой производственный цех, самый крупный на территории. С южной стороны пристройка примерно 8×8 м. С противоположной стороны большие металлические ворота примерно 4×6 м. Здание состоит из собственно цеха и офисной части — вероятно, поэтому в аренду сдаётся не всё, а только часть (совпадает с данными предыдущей оценки: «частично сдано»). GPS точек осмотра: 57.014703, 24.119793 (±64 м) и 57.014135, 24.120089 (±9 м). Вторая заметка была записана под кодом 067 (причал) — по описанию и координатам относится к этому объекту. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Конфликта нет (проверено по датам, см. отчёт «Konflikt_001_009_razbor»). До 08.04.2022 здание входило в аренду Luxury Marine Developments (N18152, с 2018 г.). 07.03.2022 подписана Vienošanās №4 к N18152: с 08.04.2022 объект аренды сокращается до зданий 001+009 (здание 017 выводится отдельно и передаётся Storage Management по N22057). Площадь по реестру — 3390,6 м², по договору — 2507,4 м² — расхождение, отдельная сверка. Ставка входит в общий платёж 3 894,85 €/мес за 001+009 (без НДС), депозит 26 853,72 €."}, "006": {"kad": "0100 068 0261 006", "name": "Арматурный цех", "area": 538.2, "year": 1961, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Капитальное одноэтажное здание, потолки 7,8 м. Грузоподъёмный кран. Отопление локальное. Окна частично новые.", "note": "Осмотр 03.09.2026. Кирпичное здание, оштукатурено, штукатурка частично обвалилась, но в целом состояние хорошее. Пластиковые окна. С южной стороны металлические ворота примерно 4×6 м (верхняя часть также открывается) — возможно, рассчитаны на второй уровень. GPS: 57.013962, 24.120175 (±4 м) — положение на карте уточнено по этой точке. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "008": {"kad": "0100 068 0261 008", "name": "Насосная станция", "area": 43.2, "year": 1992, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное одноэтажное строение.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "010": {"kad": "0100 068 0261 010", "name": "Мастерская", "area": 258.4, "year": 1989, "tc": 3, "fe": 3, "rent": "Да", "tenant": "SIA \"Starts-Rīga Plus\"", "rarea": 210, "insp": "03.09.2026", "desc": "Капитальное одноэтажное здание, высота 6 м. Бетонный пол в хорошем состоянии, центральное отопление. Сдано в аренду.", "note": "Осмотр 03.09.2026 (по словам осматривающего — мастерская): здание в среднем техническом состоянии, бетонное, крыша в хорошем состоянии. ⚠️ GPS точки крайне неточный (±76 м), положение объекта по этой заметке не уточнялось. В данных предыдущей оценки объект значится как компрессорная (258,4 м²) — требуется сверка назначения. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Договор №126S102012 от 21.08.2012, действует с автопродлением. Vienošanās №1 (27.12.2021) — техническая правка формулы расчёта коммуналки. Vienošanās №2 (31.07.2026) — ставка изменена на 900 €/мес + НДС с 01.08.2026 (было ~328 €/мес). ⚠️ Со стороны BMGS Vienošanās №2 подписана администратором процесса неплатёжеспособности (Marita Kataja-Paegle) — BMGS находится в процессе maksātnespēja. Площадь по реестру — 258.4 м², по договору — 210 м² — расхождение."}, "012": {"kad": "0100 068 0261 012", "name": "Административное здание", "area": 793.8, "year": 1964, "tc": 4, "fe": 4, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Капитальное 2-этажное здание в хорошем состоянии, центральное газовое отопление. Занято собственником.", "note": "Административное здание (корпус с адресной подписью «27 k-3»), южнее водонапорной башни (011), между ангаром 030 и корпусом 013. Принадлежность к объекту 012 подтверждена осматривающим 03.09.2026. Осмотр 02.09.2026: новые стеклопакеты, свежая штукатурка — недавняя реновация; электричество, освещение, вода — в наличии; здание хорошо отреставрировано, аккуратное, с видеонаблюдением; отдельный дополнительный вход на 2-й этаж. Осмотр 03.09.2026: здание оштукатурено, новые пластиковые окна, новые сливы. GPS точек осмотра: 57.012521, 24.121495 (±18 м) и 57.012557, 24.121389 (±9 м) — расхождение около 7 м, то есть обе заметки об одном строении. Положение на карте уточнено по точке с точностью ±9 м.", "rnote": ""}, "013": {"kad": "0100 068 0261 013", "name": "Производственный корпус", "area": 3028.6, "year": 1987, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное одноэтажное здание, потолки 13,8 м. Мощности по производству бетона, мостовые краны. Ворота новые, окна частично заменены. Офисные помещения в хорошем состоянии.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м).", "rnote": ""}, "014": {"kad": "0100 068 0261 014", "name": "Производственный корпус", "area": 2859, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное одноэтажное здание, потолки 13,8 м. Бетонное производство, мостовые краны. Ворота новые, окна частично заменены.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м).", "rnote": ""}, "015": {"kad": "0100 068 0261 015", "name": "Столовая", "area": 338.5, "year": 1975, "tc": 4, "fe": 4, "rent": "Да", "tenant": "", "rarea": null, "insp": "02.09.2026", "desc": "Капитальное одноэтажное здание в хорошем состоянии. Часть — офис, часть — столовая, есть котельная.", "note": "Осмотр 02.09.2026. Столовая. Кирпичное здание в хорошем состоянии, новые пластиковые окна, есть подключение к газу (соответствует наличию котельной по данным предыдущей оценки). Крыша визуально в хорошем состоянии. GPS точки осмотра: 57.011885, 24.121494 (±22 м). Привязка уточнена на местности 03.09.2026; ранее заметка значилась под кодом 012. Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м).", "rnote": "Сдана в аренду \"Aplauss\", ставка 100 €/мес. Источник: данные пользователя, 10.09.2026."}, "016": {"kad": "0100 068 0261 016", "name": "Бытовой корпус", "area": 852.9, "year": 1967, "tc": 4, "fe": 4, "rent": "Частично", "tenant": "SIA Riga Towage Company; AS \"PKL Flote\"", "rarea": 58.9, "insp": "02.09.2026", "desc": "Капитальное 3-этажное здание. 1-й этаж — офисы в хорошем состоянии; 2-й — раздевалки и санузлы в хорошем состоянии; 3-й — аналогичные помещения среднего состояния.", "note": "Осмотр 02.09.2026. Трёхэтажное кирпичное здание, прилегает к столовой (015) с юга, с небольшим помещением проходной и пристройкой. Пластиковые стеклопакеты. В целом состояние хорошее. Подведены газ, вода, отопление. Кровля с земли не просматривается — требуется отдельное обследование. Вероятно, требуются небольшие косметические работы по фасаду (сбитые пороги). GPS точек осмотра: 57.011957, 24.121199 (±14 м) и 57.011790, 24.121433 (±21 м). Привязка уточнена на местности 03.09.2026; ранее заметки значились под кодом 015 и без номера. Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м).", "rnote": "Апзимеюм 016 — единое здание, сдано по частям разным арендаторам. Комн. №8,№15 (37.3 м²) — Договор №11RTC2022 от 22.11.2022, SIA Riga Towage Company, 223.80 €/мес без НДС, срок до 31.12.2023 с автопродлением на 12 мес. Комн. №7 (21.6 м²) — Договор №11PKL2022 от 22.11.2022, AS \"PKL Flote\", 129.60 €/мес без НДС, тот же срок и автопродление. Суммарно сдано 58.9 м² из 852.9 м² по реестру — остальная площадь здания не проверена."}, "017": {"kad": "0100 068 0261 017", "name": "Склад", "area": 2156.8, "year": 1969, "tc": 3, "fe": 4, "rent": "Да", "tenant": "SIA \"Storage Management\"", "rarea": 2156.8, "insp": null, "desc": "Капитальное одноэтажное здание, полностью отремонтировано, потолки 7,8 м. Газовое отопление от котла арендатора. Сдано в аренду.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Конфликта нет — цепочка чистая (проверено по датам, см. отчёт «Konflikt_001_009_razbor»). До 07.04.2022 здание входило в аренду Luxury Marine Developments (N18152). 07.04.2022 подписан акт приёма-передачи — Luxury Marine Developments физически возвращает здание BMGS (основание — Vienošanās №4 от 07.03.2022, здание исключено из её объекта аренды с 08.04.2022). 08.04.2022 BMGS сдаёт это же здание новому арендатору Storage Management по договору N22057. Последовательность документально подтверждена, дублирования нет. Ставка 2.20 €/м² = 4744.96 €/мес номинально, скидка 100% (V1→V3→V4) минимум по 31.12.2024 — арендатор платит только коммунальные платежи."}, "018": {"kad": "0100 068 0261 018", "name": "Мастерская", "area": 1093.4, "year": 1967, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Одноэтажное производственное здание, потолки 8,3 м, установлен мостовой кран. Центрального отопления нет. Состояние среднее / плохое.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Используется для собственных нужд компании (не сдаётся в аренду)."}, "019": {"kad": "0100 068 0261 019", "name": "Административное здание", "area": 551.5, "year": 1967, "tc": 4, "fe": 4, "rent": "Да", "tenant": "SIA \"Storage Management\"", "rarea": 485, "insp": null, "desc": "Капитальное 3-этажное здание, ремонт выполнен около 4 лет назад. Электрическое отопление. Состояние хорошее, сдано в аренду.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Договор N22057, Vienošanās Nr.1 от 08.04.2022. Ставка 4.00 €/м² = 1940.00 €/мес номинально, скидка 100% минимум по 31.12.2024. ⚠️ Площадь по реестру — 551.5 м², по договору — 485 м² — расхождение, требует проверки."}, "020": {"kad": "0100 068 0261 020", "name": "Бомбоубежище", "area": 107.7, "year": 1978, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Бомбоубежище. Для сдачи в аренду не подходит.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м).", "rnote": ""}, "021": {"kad": "0100 068 0261 021", "name": "Склад", "area": 172.2, "year": 1992, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное одноэтажное складское здание, два складских помещения высотой 5,2 м. Состояние плохое.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м). Прежняя точка ошибочно стояла на крупном корпусе 024.", "rnote": ""}, "024": {"kad": "0100 068 0261 024", "name": "Производственное здание", "area": 3017.4, "year": 1972, "tc": 3, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "3-этажное здание без центрального отопления. 1-й этаж — производство, высота 9,3 м, установлен мостовой кран, ворота новые, окна частично заменены. 2-й этаж — отремонтированные офисы. 3-й этаж — офисы в плохом техническом состоянии.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026 (привязка плана к снимку, погрешность около 2 м). Объект — крупный тёмный корпус западнее крановых путей (073).", "rnote": ""}, "025": {"kad": "0100 068 0261 025", "name": "Склад", "area": 1022.3, "year": 1985, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное 2-этажное здание, свободно, центрального отопления нет, состояние плохое. 1-й этаж — производство высотой 6,8 м, 2-й — офисы. Снаружи рампа.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "029": {"kad": "0100 068 0261 029", "name": "Гараж", "area": 132.2, "year": 1990, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Гаражные боксы высотой 2,4 м. Для сдачи в аренду не подходят.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "030": {"kad": "0100 068 0261 030", "name": "Ангар", "area": 453, "year": 1990, "tc": 3, "fe": 3, "rent": "Да", "tenant": "SIA \"Latitude Chemicals\"", "rarea": 453, "insp": null, "desc": "Складское здание ангарного типа, ворота новые. Центрального отопления нет, состояние среднее.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Договор N21170 от 23.11.2021. Ставка 907.05 €/мес без НДС (фиксированная сумма, не по м²), скидка 100% минимум по 31.12.2024 (допсоглашения V1→V2→V3)."}, "032": {"kad": "0100 068 0261 032", "name": "Открытая складская площадка", "area": null, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Открытая складская площадка в плохом состоянии, кранов нет.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "036": {"kad": "0100 068 0261 036", "name": "Трансформаторная подстанция", "area": 100.7, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Капитальное одноэтажное здание трансформаторной подстанции.", "note": "Осмотр 03.09.2026. Трансформаторная будка — назначение подтверждено. ⚠️ GPS крайне неточный (±78 м), положение не уточнялось. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "063": {"kad": "0100 068 0261 063", "name": "Причал DS-9", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Причал DS-9. По данным реестра причалов Rīgas brīvosta (распоряжение капитана порта № 14 от 20.01.2020, приложение 2 от 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): длина причала 105,00 м, макс. допустимая осадка судна у причала 4,8 м, макс. длина судна 90,0 м (при совместном использовании акватории с DS-10 — до 130 м). Специализация: генеральные и навалочные грузы (кроме угля).", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "064": {"kad": "0100 068 0261 064", "name": "Причал DS-10", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Причал DS-10. По данным реестра причалов Rīgas brīvosta (распоряжение капитана порта № 14 от 20.01.2020, приложение 2 от 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): длина причала 100,00 м, макс. допустимая осадка судна у причала 5,0 м, макс. длина судна 90,0 м (при совместном использовании акватории с DS-9 — до 130 м). Специализация: генеральные и навалочные грузы (кроме угля).", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "065": {"kad": "0100 068 0261 065", "name": "Причал DS-11a", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Причал DS-11a.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "066": {"kad": "0100 068 0261 066", "name": "Причал DS-11", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Причал DS-11. По данным реестра причалов Rīgas brīvosta (распоряжение капитана порта № 15 от 20.01.2020, приложение 2 от 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): длина причала 85,00 м, макс. допустимая осадка судна у причала 3,5 м, макс. длина судна 50,0 м. Разрешена стоянка только судов портового флота. Специализация: краткосрочная/вынужденная резервная стоянка без оборудования; причал вспомогательного флота.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "067": {"kad": "0100 068 0261 067", "name": "Причал DS-12a", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Причал DS-12a.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "068": {"kad": "0100 068 0261 068", "name": "Причал DS-12", "area": null, "year": 1961, "tc": 3, "fe": 3, "rent": "Да", "tenant": "SIA \"OVI\"", "rarea": null, "insp": null, "desc": "Причал DS-12. По данным реестра причалов Rīgas brīvosta (распоряжение капитана порта № 15 от 20.01.2020, приложение 2 от 27.06.2026: https://rop.lv/sites/default/files/2026-06/2.%20pielikums%2027.06.2026_0.pdf): длина причала 150,00 м, макс. допустимая осадка судна у причала 2,0 м, макс. длина судна 30,0 м. Специализация: краткосрочная/вынужденная резервная стоянка без оборудования; причал вспомогательного флота. Сдан в аренду.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": "Договор N23074 от 14.03.2023. Размещение судов/плавсредств. Ставка 500 €/мес без НДС. Источник: независимый реестр недвижимости, 10.09.2026."}, "069": {"kad": "0100 068 0261 069", "name": "Бетонный узел", "area": 241.2, "year": 2004, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Бетоносмесительный узел.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "070": {"kad": "0100 068 0261 070", "name": "Котельная", "area": 58, "year": 2004, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Котельная.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "071": {"kad": "0100 068 0261 071", "name": "Мойка автобетоносмесителей", "area": 258.5, "year": 2006, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Здание в плохом состоянии.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "072": {"kad": "0100 068 0261 072", "name": "Склад (хранение моечного оборудования)", "area": 5, "year": 2006, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Здание в плохом состоянии.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "073": {"kad": "0100 068 0261 073", "name": "Крановые пути", "area": 3100, "year": 2006, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Открытая складская площадка в хорошем состоянии, краны в рабочем состоянии.", "note": "Крановые пути / открытая складская площадка 3100 м², краны в рабочем состоянии. Положение на карте исправлено 03.09.2026 по кадастровому плану: полоса юго-восточнее площадки 053, восточнее корпуса 024. Заметка осмотра от 02.09.2026, ранее ошибочно записанная под этим кодом, перенесена к объекту 012 (административное здание 27 k-3). Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "074": {"kad": "0100 068 0261 074", "name": "Открытый склад щебня и песка", "area": 1188, "year": 2005, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": "03.09.2026", "desc": "Открытая площадка хранения инертных материалов.", "note": "Осмотр 03.09.2026. Площадка разгрузки составляющих компонентов для бетона. Бетонные стены, бетонный пол. Ничего примечательного. GPS: 57.013597, 24.120882 (±6 м) — положение подтверждено, расхождение 8 м. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "023": {"kad": "0100 068 0261 023", "name": "Мойка машин", "area": 206.6, "year": 1985, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Одноэтажное производственное здание, потолки 5,3 м. Отопления нет, состояние плохое.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "062": {"kad": "0100 068 0261 062", "name": "Причал", "area": null, "year": 1986, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Причал № 062 выполняет функцию берегоукрепительного сооружения.", "note": "Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "011": {"kad": "0100 068 0261 011", "name": "Водонапорная башня", "area": 24.8, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Действующая насосная станция. Кровля и окна заменены. Для сдачи в аренду не подходит.", "note": "Объект отсутствовал в нашем реестре — добавлен по данным предыдущей оценки 2026 г. Положение на карте не определено. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "033": {"kad": "0100 068 0261 033", "name": "Открытая складская площадка", "area": 3753.5, "year": null, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Открытая складская площадка среднего состояния, есть грузоподъёмный кран.", "note": "Положение на карте определено 03.09.2026 по кадастровому плану: площадка вдоль восточной стороны корпуса 001, у причала DS-12 (068). Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "052": {"kad": "0100 068 0261 052", "name": "Открытая складская площадка", "area": 992, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Открытая складская площадка в хорошем состоянии, есть грузоподъёмные краны.", "note": "Положение на карте определено 03.09.2026 по кадастровому плану: площадка западнее корпуса 017, в сторону причала DS-9 (063). Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "053": {"kad": "0100 068 0261 053", "name": "Открытая складская площадка", "area": 4032, "year": null, "tc": 3, "fe": 3, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Открытая складская площадка в хорошем состоянии, есть грузоподъёмные краны.", "note": "Положение на карте определено 03.09.2026 по кадастровому плану: площадка восточнее построек 022 / 054 / 021, севернее полосы 073. Положение на карте перенесено с кадастрового плана 04.09.2026: центр контура объекта на плане пересчитан в точку на снимке через привязку (погрешность около 2 м).", "rnote": ""}, "057": {"kad": "0100 068 0261 057", "name": "Склад", "area": 420.7, "year": 1989, "tc": 2, "fe": 2, "rent": "", "tenant": "", "rarea": null, "insp": null, "desc": "Капитальное одноэтажное здание, не эксплуатируется. Техническое состояние не позволяет сдавать в аренду.", "note": "⚠️ ОБЪЕКТ НЕ ПОДТВЕРЖДЁН. Числится в отчёте предыдущей оценки (склад 420,7 м², 1989 г., не эксплуатируется), однако при сверке 03.09.2026 проверены обе части кадастрового плана (северная и южная, М 1:2000) — объекта с обозначением 057 на плане нет, в нумерации разрыв между 055 и 059. Вероятно, снесён или снят с кадастрового учёта после подготовки отчёта. На карту не нанесён. Действие: запросить выписку из кадастра по объекту 0100 068 0261 057.", "rnote": ""}};
+let META = META_LV;
+const IMG_SRC = {
+  lv: "map_lv.png",
+  ru: "map_ru.png",
+  parcels_lv: "map_parcels_lv.png",
+  parcels_ru: "map_parcels_ru.png"
+};
+const PARCELS = {"033": {"area": 3753.5, "pts": []}, "052": {"area": 992, "pts": []}, "P1": {"area": 1727.3, "pts": [[290.7, 320.7], [248.6, 339.9], [295.9, 444.6], [267.2, 475.2], [246.1, 553.1], [343.7, 540.9], [306.7, 424.1], [314.4, 408.8]]}, "P2": {"area": 2133.6, "pts": [[375.5, 167.5], [317.5, 200.1], [279.2, 232.7], [225.6, 246.1], [207.1, 259.5], [244.8, 316.9], [321.3, 288.8], [401.7, 229.4]]}, "P3": {"area": 3725.3, "pts": [[452.7, 287.0], [586.7, 545.8], [662.3, 506.1], [524.4, 253.4]]}, "P4": {"area": 2521.1, "pts": [[239.1, 569.7], [323.4, 789.3], [353.4, 786.1], [362.3, 748.4], [338.0, 565.8]]}, "P5": {"area": 2770.3, "pts": [[368.3, 614.6], [383.8, 729.6], [400.1, 802.5], [521.2, 772.7], [431.3, 607.6]]}, "P6": {"area": 2289.0, "pts": [[352.7, 803.9], [310.6, 817.4], [319.0, 967.4], [311.3, 993.5], [322.2, 997.4], [323.5, 1070.8], [336.9, 1094.4], [376.4, 1089.9], [371.9, 1051.6], [380.9, 1048.4]]}, "P7": {"area": 5732.5, "pts": [[637.3, 821.6], [444.0, 835.8], [467.0, 918.1], [458.0, 938.6], [424.2, 943.0], [445.3, 998.6], [444.7, 1047.1], [573.5, 1033.0], [575.4, 939.8], [668.0, 939.7]]}, "P8": {"area": 2957.2, "pts": [[331.1, 1109.7], [349.1, 1410.4], [424.3, 1399.5], [379.0, 1110.3]]}, "P9": {"area": 4138.1, "pts": [[450.9, 1308.1], [667.6, 1290.8], [698.0, 1418.8], [560.9, 1416.9], [461.8, 1408.6]]}, "P10": {"area": 3257.9, "pts": [[657.7, 1126.3], [687.2, 1242.1], [450.7, 1237.4], [446.5, 1170.1]]}, "P11": {"area": 4668.5, "pts": [[703.8, 1420.9], [700.6, 1449.9], [606.8, 1450.4], [636.9, 1644.4], [496.7, 1630.4], [474.5, 1432.2], [701.1, 1426.7]]}, "P12": {"area": 3282.1, "pts": [[730.0, 1667.0], [757.9, 1767.6], [525.9, 1762.0], [518.2, 1673.5]]}, "P13": {"area": 3948.8, "pts": [[768.0, 1773.5], [513.5, 1781.3], [544.2, 1868.3], [747.2, 1938.4], [721.0, 1793.9], [769.8, 1784.1]]}, "P14": {"area": 4891.9, "pts": [[456.6, 1570.5], [517.5, 1908.8], [412.6, 1924.1], [383.9, 1781.4], [419.5, 1625.2], [361.7, 1585.2], [357.9, 1572.7]]}, "P042A": {"area": 1490.5, "pts": [[457.3, 609.3], [490.5, 594.9], [562.3, 691.5], [594.4, 768.4], [546.8, 781.9]]}, "P06A": {"area": 2063.6, "pts": [[609.5, 759.9], [677.5, 737.4], [570.1, 559.6], [516.7, 589.3]]}, "P15": {"area": 2474.4, "pts": [[426.2, 1402.7], [343.1, 1401.9], [352.6, 1565.8], [462.0, 1568.6]]}};
+
+
+const REF_H_INIT = 2051;
+
+const codes = Object.keys(DOTS);
+const CDOT = {4:'#4ce07a', 3:'#ffdc46', 2:'#ff7f66'};
+const CST  = {4:'#2e9e55', 3:'#b98900', 2:'#c0392b'};
+
+let entries = [];
+let pendingXY = null, pendingCode = null, pendingGeo = null;
+
+/* ---------- krātuve ---------- */
+async function loadEntries(){
+  try{
+    const raw = localStorage.getItem('tvaika27_inspection_entries');
+    entries = raw ? JSON.parse(raw) : [];
+  }catch(e){ entries = []; }
+  refreshAll();
+}
+async function persist(){
+  try{ localStorage.setItem('tvaika27_inspection_entries', JSON.stringify(entries)); }
+  catch(e){ alert('Neizdevās saglabāt lokāli — iespējams, pārlūkprogrammas atmiņa ir pilna.'); }
+}
+
+/* ---------- mērogs un vilkšana ---------- */
+let scale = 1, panX = 0, panY = 0;
+const pz = document.getElementById('panzoom');
+const boxEl = document.getElementById('imgbox');
+let REF_H = REF_H_INIT;
+
+function applyTransform(){
+  pz.style.transform = 'translate('+panX+'px,'+panY+'px) scale('+scale+')';
+  document.getElementById('zoomLbl').textContent = Math.round(scale*100)+'%';
+  renderNums();
+  renderPins();
+  renderParcelPoints();
+}
+function clampPan(){
+  const bw = boxEl.clientWidth, bh = boxEl.clientHeight;
+  const cw = bw*scale, ch = bh*scale;
+  panX = Math.min(0, Math.max(panX, bw-cw));
+  panY = Math.min(0, Math.max(panY, bh-ch));
+  if(cw<=bw) panX=0;
+  if(ch<=bh) panY=0;
+}
+function zoomAt(cx, cy, factor){
+  const prev = scale;
+  scale = Math.max(1, Math.min(6, scale*factor));
+  const k = scale/prev;
+  panX = cx - (cx-panX)*k;
+  panY = cy - (cy-panY)*k;
+  clampPan(); applyTransform();
+}
+document.getElementById('zoomIn').addEventListener('click', ()=>{
+  const r=boxEl.getBoundingClientRect(); zoomAt(r.width/2, r.height/2, 1.5);
+});
+document.getElementById('zoomOut').addEventListener('click', ()=>{
+  const r=boxEl.getBoundingClientRect(); zoomAt(r.width/2, r.height/2, 1/1.5);
+});
+document.getElementById('zoomReset').addEventListener('click', ()=>{
+  scale=1; panX=0; panY=0; applyTransform();
+});
+
+let ptrs = new Map(), startDist=0, startScale=1, lastMid=null, moved=false, panStart=null;
+let longPressTimer=null, longPressFired=false, downX=0, downY=0;
+function clearLongPress(){ if(longPressTimer){ clearTimeout(longPressTimer); longPressTimer=null; } }
+boxEl.addEventListener('pointerdown', (e)=>{
+  ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  moved = false;
+  if(ptrs.size===1){
+    panStart={x:e.clientX-panX, y:e.clientY-panY};
+    downX=e.clientX; downY=e.clientY;
+    clearLongPress();
+    const pid=e.pointerId, sx=e.clientX, sy=e.clientY;
+    longPressTimer = setTimeout(()=>{
+      longPressTimer=null;
+      if(moved || ptrs.size!==1 || !ptrs.has(pid)) return;
+      if(currentLayer === 'parcels') return;
+      longPressFired = true;
+      if(navigator.vibrate) navigator.vibrate(15);
+      const img=document.getElementById('mapimg');
+      const rect=img.getBoundingClientRect();
+      const relX=(sx-rect.left)/rect.width*1200;
+      const relY=(sy-rect.top)/rect.height*REF_H;
+      openNote(relX, relY);
+    }, 550);
+  }
+  if(ptrs.size===2){
+    clearLongPress();
+    const p=[...ptrs.values()];
+    startDist=Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+    startScale=scale;
+    const r=boxEl.getBoundingClientRect();
+    lastMid={x:(p[0].x+p[1].x)/2-r.left, y:(p[0].y+p[1].y)/2-r.top};
+  }
+});
+boxEl.addEventListener('pointermove', (e)=>{
+  if(!ptrs.has(e.pointerId)) return;
+  ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if(ptrs.size===1 && Math.hypot(e.clientX-downX, e.clientY-downY)>8){
+    moved = true; clearLongPress();
+  }
+  if(ptrs.size===2){
+    const p=[...ptrs.values()];
+    const d=Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+    if(startDist>0){
+      const prev=scale;
+      scale=Math.max(1, Math.min(6, startScale*(d/startDist)));
+      const k=scale/prev;
+      panX = lastMid.x - (lastMid.x-panX)*k;
+      panY = lastMid.y - (lastMid.y-panY)*k;
+      clampPan(); applyTransform(); moved=true;
+    }
+  } else if(ptrs.size===1 && panStart && scale>1){
+    const nx = e.clientX - panStart.x, ny = e.clientY - panStart.y;
+    if(Math.abs(nx-panX)>2 || Math.abs(ny-panY)>2) moved=true;
+    panX = nx; panY = ny;
+    clampPan(); applyTransform();
+  }
+});
+function endPtr(e){
+  ptrs.delete(e.pointerId);
+  if(ptrs.size<2) startDist=0;
+  if(ptrs.size===0){ panStart=null; clearLongPress(); }
+}
+boxEl.addEventListener('pointerup', endPtr);
+boxEl.addEventListener('pointercancel', endPtr);
+boxEl.addEventListener('dblclick', (e)=>{
+  const r=boxEl.getBoundingClientRect();
+  zoomAt(e.clientX-r.left, e.clientY-r.top, scale<2.5 ? 2.5 : 1/2.5);
+});
+
+function setupRefHeight(){
+  const img=document.getElementById('mapimg');
+  function compute(){
+    if(img.naturalWidth && img.naturalHeight){
+      REF_H = 1200 * img.naturalHeight / img.naturalWidth;
+      applyTransform();
+    }
+  }
+  if(img.complete){ compute(); } else { img.addEventListener('load', compute); }
+}
+
+/* ---------- objektu marķieri ---------- */
+function renderNums(){
+  const layer=document.getElementById('numlayer');
+  layer.innerHTML='';
+  if(!document.getElementById('showNums').checked) return;
+  const inv = 1/scale;
+  for(const c of codes){
+    const m = META[c] || {};
+    const col = CDOT[m.tc] || '#dfe6ee';
+    const [x,y]=DOTS[c];
+    const dot=document.createElement('div');
+    dot.style.cssText='position:absolute;left:'+(x/1200*100)+'%;top:'+(y/REF_H*100)+'%;'
+      +'transform:translate(-50%,-50%) scale('+inv+');'
+      +'width:13px;height:13px;border-radius:50%;background:transparent;'
+      +'border:2px solid '+col+';pointer-events:none;';
+    layer.appendChild(dot);
+  }
+}
+document.getElementById('showNums').addEventListener('change', renderNums);
+
+function renderPins(){
+  const pins=document.getElementById('pins');
+  pins.innerHTML='';
+  const inv = 1/scale;
+  entries.forEach((e)=>{
+    const d=document.createElement('div');
+    d.style.cssText='position:absolute;left:'+(e.x/1200*100)+'%;top:'+(e.y/REF_H*100)+'%;'
+      +'transform:translate(-50%,-50%) scale('+inv+');'
+      +'width:15px;height:15px;border-radius:50%;background:#c0392b;'
+      +'border:2px solid #fff;pointer-events:none;';
+    pins.appendChild(d);
+  });
+}
+
+/* ---------- zemesgabali (parcels) ---------- */
+let currentLayer = 'occupancy';
+let parcelPoints = {};
+let customParcelNames = [];
+function pointInPolygon(x, y, poly){
+  let inside = false;
+  for(let i=0, j=poly.length-1; i<poly.length; j=i++){
+    const xi=poly[i][0], yi=poly[i][1], xj=poly[j][0], yj=poly[j][1];
+    const intersect = ((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi);
+    if(intersect) inside = !inside;
+  }
+  return inside;
+}
+function parcelAt(x, y){
+  for(const pid in PARCELS){
+    if(pointInPolygon(x, y, PARCELS[pid].pts)) return pid;
+  }
+  return null;
+}
+async function loadParcelPoints(){
+  try{
+    const raw = localStorage.getItem('bmgs_parcel_points_v1');
+    parcelPoints = raw ? JSON.parse(raw) : {};
+  }catch(e){ parcelPoints = {}; }
+  for(const pid in PARCELS){ if(!parcelPoints[pid]) parcelPoints[pid] = []; }
+  try{
+    const rawC = localStorage.getItem('bmgs_custom_parcels_v1');
+    customParcelNames = rawC ? JSON.parse(rawC) : [];
+  }catch(e){ customParcelNames = []; }
+  customParcelNames.forEach(n=>{ if(!parcelPoints[n]) parcelPoints[n] = []; });
+}
+function persistCustomParcels(){
+  try{ localStorage.setItem('bmgs_custom_parcels_v1', JSON.stringify(customParcelNames)); }
+  catch(e){}
+}
+function polygonAreaFromLatLon(pts){
+  if(pts.length<3) return null;
+  const latRef = pts.reduce((s,p)=>s+p.lat,0)/pts.length;
+  const mPerDegLat = 111320;
+  const mPerDegLon = 111320*Math.cos(latRef*Math.PI/180);
+  const xy = pts.map(p=>[ p.lon*mPerDegLon, p.lat*mPerDegLat ]);
+  let area2=0;
+  for(let i=0;i<xy.length;i++){
+    const [x0,y0]=xy[i]; const [x1,y1]=xy[(i+1)%xy.length];
+    area2 += x0*y1-x1*y0;
+  }
+  return Math.abs(area2)/2;
+}
+function addNewParcel(){
+  const L = I18N[currentLang];
+  const name = prompt(L.newParcelPrompt);
+  if(!name) return;
+  const trimmed = name.trim();
+  if(!trimmed) return;
+  const exists = Object.keys(PARCELS).some(k=>k.toLowerCase()===trimmed.toLowerCase())
+    || customParcelNames.some(k=>k.toLowerCase()===trimmed.toLowerCase());
+  if(exists){ alert(L.duplicateName); return; }
+  customParcelNames.push(trimmed);
+  parcelPoints[trimmed] = [];
+  persistCustomParcels();
+  persistParcelPoints();
+  renderParcelsList();
+  showParcelCard(trimmed);
+}
+document.getElementById('newParcelBtn').addEventListener('click', addNewParcel);
+document.getElementById('parcelDelete').addEventListener('click', ()=>{
+  if(!pendingParcel) return;
+  const L = I18N[currentLang];
+  if(!confirm(L.confirmDelete(pendingParcel))) return;
+  customParcelNames = customParcelNames.filter(n=>n!==pendingParcel);
+  delete parcelPoints[pendingParcel];
+  persistCustomParcels();
+  persistParcelPoints();
+  document.getElementById('parcelOverlay').style.display='none';
+  unlockBodyScroll();
+  renderParcelsList();
+  renderParcelPoints();
+});
+document.getElementById('parcelLoadOutline').addEventListener('click', ()=>{
+  if(!pendingParcel) return;
+  const info = PARCELS[pendingParcel];
+  if(!info || !info.pts || info.pts.length===0) return;
+  const now = Date.now();
+  parcelPoints[pendingParcel] = info.pts.map(([hx,hy])=>{
+    const {lat,lon} = mapPixelToGps(hx,hy);
+    return { hx, hy, lat, lon, manual:true, acc:0, ts:now };
+  });
+  persistParcelPoints();
+  renderParcelPoints();
+  renderParcelsList();
+  showParcelCard(pendingParcel);
+});
+function persistParcelPoints(){
+  try{ localStorage.setItem('bmgs_parcel_points_v1', JSON.stringify(parcelPoints)); }
+  catch(e){}
+}
+let dragState = null;
+function startPointDrag(ev, pid, idx, markerEl){
+  ev.stopPropagation();
+  ev.preventDefault();
+  dragState = { pid, idx, markerEl };
+  markerEl.setPointerCapture(ev.pointerId);
+}
+function movePointDrag(ev){
+  if(!dragState) return;
+  ev.stopPropagation();
+  const img = document.getElementById('mapimg');
+  const rect = img.getBoundingClientRect();
+  const relX = (ev.clientX-rect.left)/rect.width*1200;
+  const relY = (ev.clientY-rect.top)/rect.height*REF_H;
+  dragState.markerEl.style.left = (relX/1200*100)+'%';
+  dragState.markerEl.style.top = (relY/REF_H*100)+'%';
+  dragState.pendingHX = relX;
+  dragState.pendingHY = relY;
+}
+function endPointDrag(ev){
+  if(!dragState) return;
+  ev.stopPropagation();
+  const { pid, idx, pendingHX, pendingHY } = dragState;
+  dragState = null;
+  if(pendingHX === undefined) return;
+  const { lat, lon } = mapPixelToGps(pendingHX, pendingHY);
+  const p = parcelPoints[pid][idx];
+  p.hx = pendingHX; p.hy = pendingHY;
+  p.lat = lat; p.lon = lon; p.manual = true;
+  persistParcelPoints();
+  renderParcelPoints();
+  if(pendingParcel === pid && document.getElementById('parcelOverlay').style.display === 'flex'){
+    showParcelCard(pid);
+  }
+}
+function renderParcelPoints(){
+  const pins=document.getElementById('parcelPins');
+  if(!pins) return;
+  pins.innerHTML='';
+  if(currentLayer !== 'parcels') return;
+  const inv = 1/scale;
+  const cardOpen = document.getElementById('parcelOverlay').style.display === 'flex';
+  for(const pid in parcelPoints){
+    const pts = parcelPoints[pid];
+    if(!pts || pts.length===0) continue;
+    const isActive = cardOpen && pid === pendingParcel;
+    const pxPts = pts.map(p=>[p.hx, p.hy]);
+    if(pxPts.length>1){
+      const svgNs='http://www.w3.org/2000/svg';
+      const svg=document.createElementNS(svgNs,'svg');
+      svg.setAttribute('style','position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;');
+      svg.setAttribute('viewBox','0 0 1200 '+REF_H);
+      svg.setAttribute('preserveAspectRatio','none');
+      const poly=document.createElementNS(svgNs,'polyline');
+      poly.setAttribute('points', pxPts.map(p=>p[0]+','+p[1]).join(' '));
+      poly.setAttribute('fill','none');
+      poly.setAttribute('stroke','#ff3b30');
+      poly.setAttribute('stroke-opacity', isActive ? '1' : '0.45');
+      poly.setAttribute('stroke-width', (3*inv));
+      svg.appendChild(poly);
+      pins.appendChild(svg);
+    }
+    pts.forEach((p,idx)=>{
+      const d=document.createElement('div');
+      const baseColor = p.manual?'#8e44ad':'#ff3b30';
+      d.style.cssText='position:absolute;left:'+(p.hx/1200*100)+'%;top:'+(p.hy/REF_H*100)+'%;'
+        +'transform:translate(-50%,-50%) scale('+inv+');'
+        +'width:22px;height:22px;border-radius:50%;background:'+baseColor+';color:#fff;'
+        +'font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;'
+        +'border:2px solid #fff;'
+        +(isActive
+          ? 'pointer-events:auto;touch-action:none;cursor:grab;opacity:1;'
+          : 'pointer-events:none;opacity:0.45;');
+      d.textContent = idx+1;
+      if(isActive){
+        d.addEventListener('pointerdown', (ev)=> startPointDrag(ev, pid, idx, d));
+        d.addEventListener('pointermove', movePointDrag);
+        d.addEventListener('pointerup', endPointDrag);
+        d.addEventListener('pointercancel', endPointDrag);
+      }
+      pins.appendChild(d);
+    });
+  }
+}
+function setLayer(layer){
+  currentLayer = layer;
+  document.getElementById('mapimg').src = IMG_SRC[layer === 'parcels' ? ('parcels_'+currentLang) : currentLang];
+  document.getElementById('layerOccupancy').classList.toggle('active', layer==='occupancy');
+  document.getElementById('layerParcels').classList.toggle('active', layer==='parcels');
+  document.getElementById('notesListSection').style.display = layer==='parcels' ? 'none' : 'block';
+  document.getElementById('parcelsListSection').style.display = layer==='parcels' ? 'block' : 'none';
+  document.getElementById('helperText').style.display = layer==='parcels' ? 'none' : 'block';
+  document.getElementById('zoomRow').style.display = layer==='parcels' ? 'none' : 'flex';
+  renderParcelsList();
+  renderParcelPoints();
+}
+document.getElementById('layerOccupancy').addEventListener('click', ()=> setLayer('occupancy'));
+document.getElementById('layerParcels').addEventListener('click', ()=> setLayer('parcels'));
+
+function naturalParcelSort(keys){
+  return keys.slice().sort((a,b)=>{
+    const na = a.match(/^P(\d+)$/i);
+    const nb = b.match(/^P(\d+)$/i);
+    if(na && nb) return parseInt(na[1],10) - parseInt(nb[1],10);
+    if(na && !nb) return -1;
+    if(!na && nb) return 1;
+    return a.localeCompare(b);
+  });
+}
+function renderParcelsList(){
+  const box = document.getElementById('parcelEntries');
+  if(!box) return;
+  box.innerHTML='';
+  const L = I18N[currentLang];
+  const allIds = [...naturalParcelSort(Object.keys(PARCELS)), ...customParcelNames];
+  allIds.forEach((pid)=>{
+    const info = PARCELS[pid];
+    const pts = parcelPoints[pid] || [];
+    const live = pts.length>=3 ? polygonAreaFromLatLon(pts) : null;
+    const areaTxt = live !== null
+      ? Math.round(live).toLocaleString()+' m\u00B2 ('+L.liveEstimate+')'
+      : (info ? info.area.toLocaleString()+' m\u00B2' : L.notEnoughPoints);
+    const row=document.createElement('div');
+    row.style.cssText='border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;';
+    row.innerHTML = '<div><p style="font-weight:600;font-size:14px;margin:0 0 2px;">'+pid+(info?'':' <span style="font-weight:400;color:var(--text-muted);font-size:11px;">'+L.customTag+'</span>')+'</p>'
+      + '<p style="font-size:12px;color:var(--text-secondary);margin:0;">'+areaTxt+' \u00B7 '+L.pointsCount(pts.length)+'</p></div>'
+      + '<span style="font-size:18px;color:var(--text-muted);">\u203A</span>';
+    row.addEventListener('click', ()=> showParcelCard(pid));
+    box.appendChild(row);
+  });
+}
+
+let pendingParcel = null;
+function showParcelCard(pid){
+  pendingParcel = pid;
+  document.getElementById('mapView').style.display='block';
+  document.getElementById('listView').style.display='none';
+  document.getElementById('tabMap').classList.add('active');
+  document.getElementById('tabList').classList.remove('active');
+  document.getElementById('imgbox').scrollIntoView({behavior:'smooth', block:'start'});
+  const info = PARCELS[pid];
+  const pts = parcelPoints[pid] || [];
+  const L = I18N[currentLang];
+  let html = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+    + '<b style="font-size:17px;">'+pid+'</b></div>';
+  if(pts.length >= 3){
+    const live = polygonAreaFromLatLon(pts);
+    html += '<p style="font-size:13px;color:var(--text-secondary);margin:0 0 10px;">'
+      + L.liveEstimate+': '+Math.round(live).toLocaleString()+' m\u00B2</p>';
+    if(info && info.note){
+      const noteTxt = (typeof info.note === 'object') ? info.note[currentLang] : info.note;
+      html += '<p style="font-size:12px;color:var(--text-secondary);background:var(--surface-2);border-radius:6px;padding:6px 8px;margin:0 0 10px;">'+noteTxt+'</p>';
+    }
+  } else if(info){
+    html += '<p style="font-size:13px;color:var(--text-secondary);margin:0 0 10px;">'+L.plannedArea+': '+info.area.toLocaleString()+' m\u00B2</p>';
+    if(info.note){
+      const noteTxt = (typeof info.note === 'object') ? info.note[currentLang] : info.note;
+      html += '<p style="font-size:12px;color:var(--text-secondary);background:var(--surface-2);border-radius:6px;padding:6px 8px;margin:0 0 10px;">'+noteTxt+'</p>';
+    }
+  } else {
+    html += '<p style="font-size:13px;color:var(--text-secondary);margin:0 0 10px;">'+L.notEnoughPoints+'</p>';
+  }
+  if(pts.length===0){
+    html += '<p style="font-size:13px;color:var(--text-muted);">'+L.noPointsYet+'</p>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12.5px;">';
+    pts.forEach((p,idx)=>{
+      const t = new Date(p.ts);
+      const accTxt = p.manual ? L.manualAdjusted : ('\u00B1'+p.acc+'m');
+      html += '<tr><td style="padding:3px 6px 3px 0;color:var(--text-secondary);">#'+(idx+1)+'</td>'
+        + '<td style="padding:3px 0;">'+p.lat.toFixed(6)+', '+p.lon.toFixed(6)+'</td>'
+        + '<td style="padding:3px 0 3px 6px;color:var(--text-muted);white-space:nowrap;">'+accTxt+'</td></tr>';
+    });
+    html += '</table>';
+    html += '<p style="font-size:11px;color:var(--text-muted);margin:8px 0 0;">'+L.dragHint+'</p>';
+  }
+  document.getElementById('parcelBody').innerHTML = html;
+  document.getElementById('parcelPending').textContent = pid;
+  document.getElementById('parcelGpsStatus').textContent = '';
+  document.getElementById('parcelDelete').style.display = info ? 'none' : 'block';
+  document.getElementById('parcelLoadOutline').style.display = (info && pts.length===0) ? 'block' : 'none';
+  document.getElementById('parcelOverlay').style.display='flex';
+  renderParcelPoints();
+}
+document.getElementById('parcelClose').addEventListener('click', ()=>{
+  document.getElementById('parcelOverlay').style.display='none';
+  unlockBodyScroll();
+  renderParcelPoints();
+});
+document.getElementById('parcelOverlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'parcelOverlay'){
+    document.getElementById('parcelOverlay').style.display='none';
+    unlockBodyScroll();
+    renderParcelPoints();
+  }
+});
+const GPS_AFFINE = {
+  px: [128441.8682, -29171.4976, -1434244.9040],
+  py: [-104444.8798, -342878.9175, 22068634.1706]
+};
+const NATIVE_TO_HTML = { x: [0.95703, 0.00024, -12.546], y: [-0.00054, 0.95751, 113.449] };
+function gpsToMapPixel(lat, lon){
+  const nx = GPS_AFFINE.px[0]*lon + GPS_AFFINE.px[1]*lat + GPS_AFFINE.px[2];
+  const ny = GPS_AFFINE.py[0]*lon + GPS_AFFINE.py[1]*lat + GPS_AFFINE.py[2];
+  const hx = NATIVE_TO_HTML.x[0]*nx + NATIVE_TO_HTML.x[1]*ny + NATIVE_TO_HTML.x[2];
+  const hy = NATIVE_TO_HTML.y[0]*nx + NATIVE_TO_HTML.y[1]*ny + NATIVE_TO_HTML.y[2];
+  return { hx, hy };
+}
+function mapPixelToGps(hx, hy){
+  const a=NATIVE_TO_HTML.x[0], b=NATIVE_TO_HTML.x[1], e=NATIVE_TO_HTML.x[2];
+  const c=NATIVE_TO_HTML.y[0], d=NATIVE_TO_HTML.y[1], f=NATIVE_TO_HTML.y[2];
+  const det1 = a*d - b*c;
+  const nx = (d*(hx-e) - b*(hy-f)) / det1;
+  const ny = (-c*(hx-e) + a*(hy-f)) / det1;
+  const A=GPS_AFFINE.px[0], B=GPS_AFFINE.px[1], C=GPS_AFFINE.px[2];
+  const D=GPS_AFFINE.py[0], E=GPS_AFFINE.py[1], F=GPS_AFFINE.py[2];
+  const det2 = A*E - B*D;
+  const lon = (E*(nx-C) - B*(ny-F)) / det2;
+  const lat = (-D*(nx-C) + A*(ny-F)) / det2;
+  return { lat, lon };
+}
+function persistParcelPointCapture(pid, lat, lon, acc){
+  if(!pid) return;
+  const { hx, hy } = gpsToMapPixel(lat, lon);
+  if(!parcelPoints[pid]) parcelPoints[pid] = [];
+  parcelPoints[pid].push({ lat, lon, acc, ts: Date.now(), hx, hy });
+  persistParcelPoints();
+  renderParcelPoints();
+  renderParcelsList();
+}
+document.getElementById('parcelAddPoint').addEventListener('click', ()=>{
+  const st = document.getElementById('parcelGpsStatus');
+  const L = I18N[currentLang];
+  const btn = document.getElementById('parcelAddPoint');
+  if(!navigator.geolocation){ st.textContent = L.gpsUnsupported; return; }
+  btn.disabled = true;
+  let best = null;
+  let samples = 0;
+  const DURATION_MS = 7000;
+  st.textContent = L.gpsMeasuring(null);
+  const watchId = navigator.geolocation.watchPosition(
+    (pos)=>{
+      samples++;
+      const acc = Math.round(pos.coords.accuracy);
+      if(!best || acc < best.acc){
+        best = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc };
+      }
+      st.textContent = L.gpsMeasuring(best.acc);
+    },
+    (err)=>{ st.textContent = L.gpsError(err.code===1); },
+    { enableHighAccuracy:true, timeout:DURATION_MS, maximumAge:0 }
+  );
+  setTimeout(()=>{
+    navigator.geolocation.clearWatch(watchId);
+    btn.disabled = false;
+    if(!best){
+      st.textContent = L.gpsError(false);
+      return;
+    }
+    persistParcelPointCapture(pendingParcel, best.lat, best.lon, best.acc);
+    st.textContent = 'GPS: '+best.lat.toFixed(6)+', '+best.lon.toFixed(6)+' (\u00B1'+best.acc+' m)';
+    showParcelCard(pendingParcel);
+  }, DURATION_MS);
+});
+document.getElementById('parcelUndo').addEventListener('click', ()=>{
+  if(!pendingParcel) return;
+  const pts = parcelPoints[pendingParcel];
+  if(pts && pts.length>0){ pts.pop(); persistParcelPoints(); renderParcelPoints(); renderParcelsList(); showParcelCard(pendingParcel); }
+});
+document.getElementById('parcelCopyAll').addEventListener('click', async ()=>{
+  const lines = [];
+  Object.keys(parcelPoints).sort().forEach(pid=>{
+    const pts = parcelPoints[pid];
+    if(!pts || pts.length===0) return;
+    lines.push(pid+':');
+    pts.forEach((p,idx)=>{
+      const tag = p.manual ? ', ' + I18N[currentLang].manualAdjusted : ' (\u00B1'+p.acc+'m)';
+      const px = ' [px ' + p.hx.toFixed(1) + ', ' + p.hy.toFixed(1) + ']';
+      lines.push('  #'+(idx+1)+' '+p.lat.toFixed(6)+', '+p.lon.toFixed(6)+tag+px);
+    });
+  });
+  const text = lines.length ? lines.join('\n') : I18N[currentLang].noPointsYet;
+  try{
+    await navigator.clipboard.writeText(text);
+    const btn=document.getElementById('parcelCopyAll'); const orig=btn.textContent;
+    btn.textContent=I18N[currentLang].copied; setTimeout(()=>{btn.textContent=orig;},1500);
+  }catch(e){}
+});
+
+/* ---------- kura odziņa "i" zem nospiešanas ---------- */
+function tabAt(mx, my){
+  for(const c of codes){
+    const b = BOX[c]; if(!b) continue;
+    const l = b.lab, t = b.tab, pad = 6;
+    const x0 = Math.min(l[0], t[0]) - pad;
+    const y0 = Math.min(l[1], t[1]) - pad;
+    const x1 = Math.max(l[0]+l[2], t[0]+t[2]) + pad;
+    const y1 = Math.max(l[1]+l[3], t[1]+t[3]) + pad;
+    if(mx >= x0 && mx <= x1 && my >= y0 && my <= y1) return c;
+  }
+  return null;
+}
+function nearestList(x,y,n){
+  const arr = codes.map(c=>{
+    const [dx,dy]=DOTS[c];
+    return {code:c, dist:Math.hypot(dx-x, dy-y)};
+  });
+  arr.sort((a,b)=>a.dist-b.dist);
+  return arr.slice(0,n);
+}
+
+/* ---------- objekta kartīte ---------- */
+function fmt(v){ return (v===null||v===undefined||v==='') ? '\u2014' : v; }
+function lockBodyScroll(){ document.body.style.overflow = 'hidden'; }
+function unlockBodyScroll(){ document.body.style.overflow = ''; }
+const OCC_LEASED = new Set(['001','017','019','030','010','068','015']);
+const OCC_MIXED = new Set(['016']);
+const OCC_OWN = new Set(['012','013','014','069','070','073','074','003','011','020','036','037','053','054','018']);
+const OCC_REVIEW = new Set(['023','071','072']);
+const OCC_TECH = new Set(['008','040','031','059','055']);
+function occCategory(c){
+  if(OCC_LEASED.has(c)) return 'LEASED';
+  if(OCC_MIXED.has(c)) return 'MIXED';
+  if(OCC_OWN.has(c)) return 'OWN';
+  if(OCC_REVIEW.has(c)) return 'REVIEW';
+  if(OCC_TECH.has(c)) return 'TECH';
+  return 'FREE';
+}
+const OCC_CARD_BG = {
+  LEASED: '#eafaec', OWN: '#eaf4fd', FREE: '#fdfbe8',
+  MIXED: '#fdf1e4', REVIEW: '#f6edfb', TECH: '#f1f1f1'
+};
+function showInfo(c){
+  const m = META[c] || {};
+  const col = CST[m.tc] || '#555';
+  const L = I18N[currentLang];
+  document.getElementById('infoCard').style.background = OCC_CARD_BG[occCategory(c)];
+  const rows = [
+    [L.fieldKad, fmt(m.kad)],
+    [L.fieldArea, m.area ? m.area+' m\u00B2' : '\u2014'],
+    [L.fieldYear, fmt(m.year)],
+    [L.fieldTc, m.tc ? m.tc+L.of5 : '\u2014'],
+    [L.fieldFe, m.fe ? m.fe+L.of5 : '\u2014'],
+    [L.fieldRent, fmt(m.rent)],
+    [L.fieldTenant, fmt(m.tenant)],
+    [L.fieldRarea, m.rarea ? m.rarea+' m\u00B2' : '\u2014'],
+    [L.fieldInsp, fmt(m.insp)]
+  ];
+  let html = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+    + '<span style="width:14px;height:14px;border-radius:50%;background:'+col+';display:inline-block;flex:0 0 auto;"></span>'
+    + '<b style="font-size:17px;">'+c+(m.name?' \u00B7 '+m.name:'')+'</b></div>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+  for(const r of rows){
+    html += '<tr><td style="padding:3px 8px 3px 0;color:var(--text-secondary);white-space:nowrap;vertical-align:top;">'
+         + r[0] + '</td><td style="padding:3px 0;">' + r[1] + '</td></tr>';
+  }
+  html += '</table>';
+  function block(title, text){
+    if(!text) return '';
+    return '<div style="margin-top:12px;">'
+      + '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">'+title+'</div>'
+      + '<div style="font-size:12.5px;line-height:1.45;">'+String(text).replace(/</g,'&lt;')+'</div></div>';
+  }
+  html += block(L.blockDesc, m.desc);
+  html += block(L.blockNote, m.note);
+  html += block(L.blockRent, m.rnote);
+  document.getElementById('infoBody').innerHTML = html;
+  document.getElementById('infoPending').textContent = c;
+  document.getElementById('infoOverlay').style.display='flex';
+  lockBodyScroll();
+}
+document.getElementById('infoClose').addEventListener('click', ()=>{
+  document.getElementById('infoOverlay').style.display='none';
+  unlockBodyScroll();
+});
+document.getElementById('infoNote').addEventListener('click', ()=>{
+  const c = document.getElementById('infoPending').textContent;
+  document.getElementById('infoOverlay').style.display='none';
+  const p = DOTS[c];
+  openNote(p[0], p[1], c);
+});
+document.getElementById('infoOverlay').addEventListener('click', (ev)=>{
+  if(ev.target.id === 'infoOverlay'){
+    document.getElementById('infoOverlay').style.display='none';
+    unlockBodyScroll();
+  }
+});
+
+/* ---------- piezīme ---------- */
+function openNote(relX, relY, presetCode){
+  pendingXY={x:relX,y:relY};
+  const list = nearestList(relX,relY,5);
+  pendingCode = presetCode || list[0].code;
+  let items = list.slice();
+  if(presetCode && !items.some(i=>i.code===presetCode)){
+    items.unshift({code:presetCode, dist:0});
+    items = items.slice(0,5);
+  }
+  const box = document.getElementById('codeChoices');
+  box.innerHTML='';
+  items.forEach((it)=>{
+    const b=document.createElement('button');
+    const m=META[it.code]||{};
+    b.type='button'; b.dataset.code=it.code;
+    b.innerHTML='<b>'+it.code+'</b>'+(m.name?' '+m.name:'');
+    const sel = it.code===pendingCode;
+    b.style.cssText='padding:7px 10px;font-size:13px;border-radius:8px;'
+      +'border:1.5px solid '+(sel?'#2b7':'var(--border)')+';'
+      +'background:'+(sel?'#e6f7ee':'#e9edf1')+';';
+    b.addEventListener('click',()=>{
+      pendingCode=it.code;
+      Array.prototype.forEach.call(box.children, el=>{
+        const s2 = el.dataset.code===it.code;
+        el.style.border='1.5px solid '+(s2?'#2b7':'var(--border)');
+        el.style.background = s2?'#e6f7ee':'#e9edf1';
+      });
+      document.getElementById('codeOverride').value='';
+    });
+    box.appendChild(b);
+  });
+  document.getElementById('modalCode').textContent =
+    I18N[currentLang].chosenObject(pendingCode);
+  document.getElementById('codeOverride').value='';
+  document.getElementById('noteInput').value='';
+  document.getElementById('manualGeo').value='';
+  document.getElementById('errMsg').style.display='none';
+  document.getElementById('modalOverlay').style.display='flex';
+  lockBodyScroll();
+  requestGeo();
+}
+
+document.getElementById('imgbox').addEventListener('click', (ev)=>{
+  if(moved) return;
+  if(longPressFired){ longPressFired=false; return; }
+  const img=document.getElementById('mapimg');
+  const rect=img.getBoundingClientRect();
+  const relX=(ev.clientX-rect.left)/rect.width*1200;
+  const relY=(ev.clientY-rect.top)/rect.height*REF_H;
+  if(currentLayer === 'parcels'){
+    const pid = parcelAt(relX, relY);
+    if(pid){ showParcelCard(pid); }
+    return;
+  }
+  const tab = tabAt(relX, relY);
+  if(tab){ showInfo(tab); }
+});
+
+/* ---------- GPS ---------- */
+function requestGeo(){
+  pendingGeo = null;
+  const st = document.getElementById('gpsStatus');
+  const L = I18N[currentLang];
+  st.textContent = L.gpsDetecting;
+  if(!navigator.geolocation){ st.textContent = L.gpsUnsupported; return; }
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      pendingGeo = {lat:pos.coords.latitude, lon:pos.coords.longitude, acc:Math.round(pos.coords.accuracy)};
+      st.textContent = 'GPS: '+pendingGeo.lat.toFixed(6)+', '+pendingGeo.lon.toFixed(6)+' (±'+pendingGeo.acc+' m)';
+    },
+    (err)=>{ st.textContent = L.gpsError(err.code===1); },
+    { enableHighAccuracy:true, timeout:12000, maximumAge:15000 }
+  );
+}
+
+/* ---------- balss ievade ---------- */
+let recognition = null, listening = false;
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+function setMicUI(active){
+  const btn = document.getElementById('micBtn');
+  const st = document.getElementById('micStatus');
+  if(active){
+    btn.style.background = '#c0392b';
+    btn.innerHTML = '⏹';
+    st.style.display = 'block';
+    st.textContent = I18N[currentLang].listening;
+  } else {
+    btn.style.background = '';
+    btn.innerHTML = '🎤';
+    st.style.display = 'none';
+  }
+}
+document.getElementById('micBtn').addEventListener('click', ()=>{
+  const st = document.getElementById('micStatus');
+  const L = I18N[currentLang];
+  if(!SpeechRec){ st.style.display='block'; st.textContent=L.voiceUnsupported; return; }
+  if(listening){ recognition.stop(); return; }
+  recognition = new SpeechRec();
+  recognition.lang = currentLang === 'ru' ? 'ru-RU' : 'lv-LV';
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  const noteEl = document.getElementById('noteInput');
+  const baseText = noteEl.value.trim();
+  let finalTranscript = '';
+  const taken = new Set();
+  recognition.onresult = (ev)=>{
+    for(let i=ev.resultIndex; i<ev.results.length; i++){
+      if(!ev.results[i].isFinal) continue;
+      if(taken.has(i)) continue;
+      taken.add(i);
+      const t = ev.results[i][0].transcript.trim();
+      if(t) finalTranscript += (finalTranscript ? ' ' : '') + t;
+    }
+    noteEl.value = ((baseText ? baseText+' ' : '') + finalTranscript).replace(/\s+/g,' ').trimStart();
+  };
+  recognition.onerror = (ev)=>{
+    st.style.display='block';
+    st.textContent = I18N[currentLang].micError(ev.error==='not-allowed');
+    listening=false; setMicUI(false);
+  };
+  recognition.onend = ()=>{ listening=false; setMicUI(false); };
+  recognition.start(); listening=true; setMicUI(true);
+});
+function stopListening(){ if(listening && recognition) recognition.stop(); }
+
+/* ---------- saglabāšana un saraksts ---------- */
+document.getElementById('cancelBtn').addEventListener('click', ()=>{
+  stopListening();
+  document.getElementById('modalOverlay').style.display='none';
+  unlockBodyScroll();
+});
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  stopListening();
+  const note=document.getElementById('noteInput').value.trim();
+  if(!note){ document.getElementById('errMsg').style.display='block'; return; }
+  const override=document.getElementById('codeOverride').value.trim();
+  const code = override || pendingCode;
+  let finalGeo = pendingGeo;
+  const manual = document.getElementById('manualGeo').value.trim();
+  if(manual){
+    const mm = manual.match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
+    if(mm) finalGeo = {lat:parseFloat(mm[1]), lon:parseFloat(mm[2]), acc:null, manual:true};
+  }
+  entries.push({code:code, note:note, x:pendingXY.x, y:pendingXY.y, ts:Date.now(), geo:finalGeo});
+  await persist();
+  document.getElementById('modalOverlay').style.display='none';
+  unlockBodyScroll();
+  refreshAll();
+});
+
+function refreshAll(){
+  document.getElementById('cnt').textContent = entries.length;
+  renderPins();
+  renderList();
+}
+function renderList(){
+  const box=document.getElementById('entries');
+  const empty=document.getElementById('emptyState');
+  if(entries.length===0){ box.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  const sorted=entries.slice().sort((a,b)=> a.code.localeCompare(b.code));
+  box.innerHTML='';
+  sorted.forEach((e)=>{
+    const realIdx = entries.indexOf(e);
+    const d=new Date(e.ts);
+    const dstr=d.toLocaleDateString()+' '+d.toLocaleTimeString().slice(0,5);
+    const L = I18N[currentLang];
+    const geo = e.geo
+      ? '📍 '+e.geo.lat.toFixed(6)+', '+e.geo.lon.toFixed(6)+(e.geo.manual?L.manualTag:' (±'+e.geo.acc+' m)')
+      : L.noGps;
+    const row=document.createElement('div');
+    row.style.cssText='border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;';
+    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">'
+      +'<div><p style="font-weight:500;font-size:14px;margin:0 0 4px;">'+e.code+'</p>'
+      +'<p style="font-size:13px;color:var(--text-secondary);margin:0 0 4px;">'+e.note.replace(/</g,'&lt;')+'</p>'
+      +'<p style="font-size:11px;color:var(--text-muted);margin:0 0 4px;">'+geo+'</p>'
+      +'<p style="font-size:11px;color:var(--text-muted);margin:0;">'+dstr+'</p></div>'
+      +'<button data-idx="'+realIdx+'" class="delBtn" aria-label="'+L.deleteLabel+'" style="flex-shrink:0;padding:4px 8px;">🗑</button></div>';
+    box.appendChild(row);
+  });
+  Array.prototype.forEach.call(box.querySelectorAll('.delBtn'), btn=>{
+    btn.addEventListener('click', async ()=>{
+      entries.splice(parseInt(btn.getAttribute('data-idx')),1);
+      await persist(); refreshAll();
+    });
+  });
+}
+document.getElementById('copyAll').addEventListener('click', async ()=>{
+  const sorted=entries.slice().sort((a,b)=> a.code.localeCompare(b.code));
+  const L = I18N[currentLang];
+  const text = sorted.map(e=>{
+    const d=new Date(e.ts);
+    const g = e.geo ? ' ['+e.geo.lat.toFixed(6)+', '+e.geo.lon.toFixed(6)+(e.geo.manual?L.manualTagShort:', \u00b1'+e.geo.acc+'m')+']' : L.noGpsShort;
+    return '\u2116'+e.code+' \u2014 '+e.note+g+' ('+d.toLocaleDateString()+')';
+  }).join('\n');
+  try{
+    await navigator.clipboard.writeText(text);
+    const btn=document.getElementById('copyAll'); const orig=btn.textContent;
+    btn.textContent=L.copied; setTimeout(()=>{btn.textContent=orig;},1500);
+  }catch(e){}
+});
+
+/* ---------- cilnes ---------- */
+document.getElementById('tabMap').addEventListener('click', ()=>{
+  document.getElementById('mapView').style.display='block';
+  document.getElementById('listView').style.display='none';
+  document.getElementById('tabMap').classList.add('active');
+  document.getElementById('tabList').classList.remove('active');
+});
+document.getElementById('tabList').addEventListener('click', ()=>{
+  document.getElementById('mapView').style.display='none';
+  document.getElementById('listView').style.display='block';
+  document.getElementById('tabList').classList.add('active');
+  document.getElementById('tabMap').classList.remove('active');
+});
+
+const I18N = {
+  lv: {
+    subtitleText: 'Interaktīvā objekta karte — apskate un piezīmju uzskaite',
+    helperText: 'Nospiediet uz objekta numura — atvērsies datu kartīte.',
+    tabMap: 'Karte', tabList: 'Saraksts', zoomReset: 'Atiestatīt', numsLabel: 'Numuri',
+    emptyState: 'Pagaidām nav piezīmju. Dodieties uz karti un atzīmējiet ēku.',
+    copyAll: 'Kopēt sarakstu', infoClose: 'Aizvērt', infoNote: 'Piezīme',
+    modalTitle: 'Tuvākais objekts', modalSub: 'Izvēlieties objektu (pēc tuvuma nospiešanas punktam):',
+    gpsDetecting: 'Nosakām GPS…', gpsUnsupported: 'GPS nav pieejams šajā pārlūkprogrammā',
+    gpsError: (noPerm)=> 'GPS netika iegūts ('+(noPerm?'nav atļaujas':'nav signāla')+') — saglabās bez koordinātām',
+    manualGeoPlaceholder: 'Vai ievadiet koordinātas manuāli: 56.949540, 24.105180',
+    codeOverridePlaceholder: 'Objekta kods, ja nav pareizs',
+    notePlaceholder: 'Ko redzējāt — stāvoklis, piezīmes',
+    micLabel: 'Balss piezīme', errMsg: 'Ierakstiet piezīmi',
+    cancelBtn: 'Atcelt', saveBtn: 'Saglabāt',
+    listening: 'Klausos… teksts parādās pēc pauzēm. Nospiediet vēlreiz, lai apturētu',
+    voiceUnsupported: 'Balss ievade netiek atbalstīta — ierakstiet tekstu manuāli',
+    micError: (noPerm)=> noPerm ? 'Nav atļaujas mikrofonam' : 'Atpazīšanas kļūda — mēģiniet vēlreiz',
+    deleteLabel: 'Dzēst', manualTag: ' (manuāli)', noGps: '📍 nav koordinātu',
+    manualTagShort: ', manuāli', noGpsShort: ' [bez GPS]', copied: 'Nokopēts',
+    chosenObject: (code)=> 'Izvēlēts objekts '+code+'. Ja vajadzīgā nav sarakstā — ierakstiet kodu manuāli.',
+    fieldKad: 'Kadastra apzīmējums', fieldArea: 'Platība', fieldYear: 'Būvniecības gads',
+    fieldTc: 'Tehniskais stāvoklis', fieldFe: 'Funkcionalitāte', fieldRent: 'Izīrēts',
+    fieldTenant: 'Īrnieks', fieldRarea: 'Izīrētā platība', fieldInsp: 'Apskates datums', of5: ' no 5',
+    blockDesc: 'Raksturojums', blockNote: 'Apskate un piezīmes', blockRent: 'Īre',
+    layerOccupancy: 'Aizņemtība', layerParcels: 'Zemesgabali',
+    plannedArea: 'Plānotā platība', noPointsYet: 'Vēl nav neviena uzmērīta punkta.',
+    pointsCount: (n)=> n===0 ? 'nav punktu' : (n+(n===1?' punkts':' punkti')),
+    parcelAddPoint: '+ Pievienot punktu (GPS)', parcelUndo: '↩ Atcelt pēdējo',
+    parcelCopyAll: 'Kopēt visus zemesgabalu punktus', parcelClose: 'Aizvērt',
+    gpsMeasuring: (acc)=> acc===null ? 'Mērām... gaidām GPS signālu' : ('Mērām, lai uzlabotu precizitāti... pašlabākais: \u00B1'+acc+' m'),
+    manualAdjusted: 'labots ar roku', dragHint: 'Ja punkts nogūlās nepareizi — pavelciet to uz kartes uz pareizo vietu.',
+    newParcelBtn: '+ Jauns zemesgabals', newParcelPrompt: 'Jaunā zemesgabala nosaukums (piem., P14):',
+    duplicateName: 'Šāds nosaukums jau pastāv, izvēlieties citu.', customTag: '(pievienots)',
+    liveEstimate: 'aptuvenā platība pēc GPS punktiem', notEnoughPoints: 'Vēl nepietiek punktu platības aprēķinam (vajag vismaz 3)',
+    parcelDelete: 'Dzēst zemesgabalu', confirmDelete: (name)=> 'Dzēst zemesgabalu '+name+' un visus tā punktus?',
+    loadOutline: 'Ielādēt kontūru labošanai',
+  },
+  ru: {
+    subtitleText: 'Интерактивная карта объекта — осмотр и учёт заметок',
+    helperText: 'Нажмите на номер объекта — откроется карточка с данными.',
+    tabMap: 'Карта', tabList: 'Список', zoomReset: 'Сброс', numsLabel: 'Номера',
+    emptyState: 'Пока нет заметок. Перейдите на карту и отметьте здание.',
+    copyAll: 'Скопировать список', infoClose: 'Закрыть', infoNote: 'Заметка',
+    modalTitle: 'Ближайший объект', modalSub: 'Выберите объект (по близости к точке нажатия):',
+    gpsDetecting: 'Определяем GPS…', gpsUnsupported: 'GPS недоступен в этом браузере',
+    gpsError: (noPerm)=> 'GPS не получен ('+(noPerm?'нет разрешения':'сигнала нет')+') — сохранится без координат',
+    manualGeoPlaceholder: 'Или вставьте координаты вручную: 56.949540, 24.105180',
+    codeOverridePlaceholder: 'Код объекта, если не тот',
+    notePlaceholder: 'Что увидели — состояние, замечания',
+    micLabel: 'Голосовая заметка', errMsg: 'Впишите заметку',
+    cancelBtn: 'Отмена', saveBtn: 'Сохранить',
+    listening: 'Слушаю… текст появляется после пауз. Нажмите ещё раз, чтобы остановить',
+    voiceUnsupported: 'Голосовой ввод не поддерживается — впишите текст вручную',
+    micError: (noPerm)=> noPerm ? 'Нет разрешения на микрофон' : 'Ошибка распознавания — попробуйте ещё раз',
+    deleteLabel: 'Удалить', manualTag: ' (вручную)', noGps: '📍 нет координат',
+    manualTagShort: ', вручную', noGpsShort: ' [без GPS]', copied: 'Скопировано',
+    chosenObject: (code)=> 'Выбран объект '+code+'. Если нужного нет в списке — впишите код вручную.',
+    fieldKad: 'Кадастровое обозначение', fieldArea: 'Площадь', fieldYear: 'Год постройки',
+    fieldTc: 'Тех. состояние', fieldFe: 'Функциональность', fieldRent: 'Сдано в аренду',
+    fieldTenant: 'Арендатор', fieldRarea: 'Площадь в аренде', fieldInsp: 'Дата осмотра', of5: ' из 5',
+    blockDesc: 'Характеристика', blockNote: 'Осмотр и примечания', blockRent: 'Аренда',
+    layerOccupancy: 'Занятость', layerParcels: 'Участки',
+    plannedArea: 'Плановая площадь', noPointsYet: 'Пока нет ни одной измеренной точки.',
+    pointsCount: (n)=> n===0 ? 'нет точек' : (n+' '+(n===1?'точка':(n<5?'точки':'точек'))),
+    parcelAddPoint: '+ Добавить точку (GPS)', parcelUndo: '↩ Отменить последнюю',
+    parcelCopyAll: 'Скопировать все точки участков', parcelClose: 'Закрыть',
+    gpsMeasuring: (acc)=> acc===null ? 'Измеряем... ждём сигнал GPS' : ('Измеряем, чтобы уточнить точность... лучшее пока: \u00B1'+acc+' м'),
+    manualAdjusted: 'поправлено вручную', dragHint: 'Если точка легла не туда — перетащите её на карте в нужное место.',
+    newParcelBtn: '+ Новый участок', newParcelPrompt: 'Название нового участка (например, P14):',
+    duplicateName: 'Такое название уже есть, выберите другое.', customTag: '(добавлен)',
+    liveEstimate: 'примерная площадь по GPS-точкам', notEnoughPoints: 'Пока недостаточно точек для расчёта площади (нужно минимум 3)',
+    parcelDelete: 'Удалить участок', confirmDelete: (name)=> 'Удалить участок '+name+' и все его точки?',
+    loadOutline: 'Загрузить контур для правки',
+  }
+};
+let currentLang = 'ru';
+function applyLang(lang){
+  currentLang = lang;
+  META = (lang === 'lv') ? META_LV : META_RU;
+  const L = I18N[lang];
+  document.getElementById('subtitleText').textContent = L.subtitleText;
+  document.getElementById('helperText').textContent = L.helperText;
+  document.getElementById('tabMap').textContent = L.tabMap;
+  document.getElementById('zoomReset').textContent = L.zoomReset;
+  document.getElementById('numsLabel').textContent = L.numsLabel;
+  document.getElementById('emptyState').textContent = L.emptyState;
+  document.getElementById('copyAll').textContent = L.copyAll;
+  document.getElementById('infoClose').textContent = L.infoClose;
+  document.getElementById('infoNote').textContent = L.infoNote;
+  document.getElementById('modalTitle').textContent = L.modalTitle;
+  document.getElementById('modalSub').textContent = L.modalSub;
+  document.getElementById('gpsStatus').textContent = L.gpsDetecting;
+  document.getElementById('manualGeo').placeholder = L.manualGeoPlaceholder;
+  document.getElementById('codeOverride').placeholder = L.codeOverridePlaceholder;
+  document.getElementById('noteInput').placeholder = L.notePlaceholder;
+  document.getElementById('micBtn').setAttribute('aria-label', L.micLabel);
+  document.getElementById('errMsg').textContent = L.errMsg;
+  document.getElementById('cancelBtn').textContent = L.cancelBtn;
+  document.getElementById('saveBtn').textContent = L.saveBtn;
+  document.getElementById('mapimg').src = IMG_SRC[currentLayer === 'parcels' ? ('parcels_'+lang) : lang];
+  document.getElementById('layerOccupancy').textContent = L.layerOccupancy;
+  document.getElementById('layerParcels').textContent = L.layerParcels;
+  document.getElementById('parcelAddPoint').textContent = L.parcelAddPoint;
+  document.getElementById('parcelUndo').textContent = L.parcelUndo;
+  document.getElementById('parcelCopyAll').textContent = L.parcelCopyAll;
+  document.getElementById('parcelClose').textContent = L.parcelClose;
+  document.getElementById('newParcelBtn').textContent = L.newParcelBtn;
+  document.getElementById('parcelDelete').textContent = L.parcelDelete;
+  document.getElementById('parcelLoadOutline').textContent = L.loadOutline;
+  renderParcelsList();
+  if(document.getElementById('parcelOverlay').style.display === 'flex' && pendingParcel){
+    showParcelCard(pendingParcel);
+  }
+  document.getElementById('langLV').classList.toggle('active', lang==='lv');
+  document.getElementById('langRU').classList.toggle('active', lang==='ru');
+  document.documentElement.lang = lang;
+  const tabListBtn = document.getElementById('tabList');
+  const cnt = document.getElementById('cnt');
+  tabListBtn.textContent = '';
+  tabListBtn.appendChild(document.createTextNode(L.tabList + ' ('));
+  tabListBtn.appendChild(cnt);
+  tabListBtn.appendChild(document.createTextNode(')'));
+  if(document.getElementById('infoOverlay').style.display === 'flex'){
+    const c = document.getElementById('infoPending').textContent;
+    if(c) showInfo(c);
+  }
+  refreshAll();
+}
+document.getElementById('langLV').addEventListener('click', ()=> applyLang('lv'));
+document.getElementById('langRU').addEventListener('click', ()=> applyLang('ru'));
+
+setupRefHeight();
+loadEntries();
+loadParcelPoints();
+applyLang('ru');
+setLayer('occupancy');
+
+</script>
+
+</body>
+</html>
