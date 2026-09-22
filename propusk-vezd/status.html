@@ -59,6 +59,11 @@
   .subtitle { margin: 0; font-size: 13px; color: var(--text-muted); }
   .refresh-btn { appearance: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
     border-radius: 999px; padding: 8px 14px; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+  .header-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+  .lang-switch { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+  .lang-btn { appearance: none; border: none; background: transparent; color: var(--text-muted); font-family: inherit;
+    font-weight: 700; font-size: 12px; padding: 6px 11px; border-radius: 999px; cursor: pointer; }
+  .lang-btn.active { background: var(--text); color: var(--bg); }
   main { max-width: 620px; margin: 0 auto; padding: 16px 14px 48px; }
   .req { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
     box-shadow: var(--shadow); padding: 14px 14px 12px; margin-bottom: 10px; }
@@ -113,10 +118,16 @@
   <div class="stripes"></div>
   <div class="header-inner">
     <div>
-      <h1>Статус заявок</h1>
-      <p class="subtitle">BMGS Tvaika 27 — все заявки и их состояние</p>
+      <h1 data-i18n="h1">Статус заявок</h1>
+      <p class="subtitle" data-i18n="subtitle">BMGS Tvaika 27 — все заявки и их состояние</p>
     </div>
-    <button class="refresh-btn" id="refreshBtn">Обновить</button>
+    <div class="header-controls">
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="ru">RU</button>
+        <button class="lang-btn" data-lang="lv">LV</button>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" data-i18n="btnRefresh">Обновить</button>
+    </div>
   </div>
 </header>
 
@@ -124,31 +135,31 @@
   <div class="export-card">
     <div class="export-row">
       <select id="rangeSelect">
-        <option value="week">Последняя неделя</option>
-        <option value="month" selected>Текущий месяц</option>
-        <option value="all">Весь период</option>
-        <option value="custom">Свой период…</option>
+        <option value="week" data-i18n="optWeek">Последняя неделя</option>
+        <option value="month" selected data-i18n="optMonth">Текущий месяц</option>
+        <option value="all" data-i18n="optAll">Весь период</option>
+        <option value="custom" data-i18n="optCustom">Свой период…</option>
       </select>
     </div>
     <div class="custom-dates" id="customDates">
       <input type="date" id="dateFrom">
       <input type="date" id="dateTo">
     </div>
-    <button class="btn-export" id="exportBtn">Скачать / Распечатать (PDF)</button>
+    <button class="btn-export" id="exportBtn" data-i18n="btnExport">Скачать / Распечатать (PDF)</button>
   </div>
 
-  <div class="section-label" id="pendingLabel" style="display:none">В рассмотрении</div>
+  <div class="section-label" id="pendingLabel" style="display:none" data-i18n="labelPending">В рассмотрении</div>
   <div id="pendingList"></div>
-  <div class="section-label" id="approvedLabel" style="display:none">Утверждено</div>
+  <div class="section-label" id="approvedLabel" style="display:none" data-i18n="labelApproved">Утверждено</div>
   <div id="approvedList"></div>
 </main>
 
 <div id="printArea">
-  <h2>Заявки на въезд — BMGS Tvaika 27</h2>
+  <h2 id="printTitle">Заявки на въезд — BMGS Tvaika 27</h2>
   <div class="meta" id="printMeta"></div>
   <table>
     <thead>
-      <tr>
+      <tr id="printHeadRow">
         <th>Дата</th><th>Время</th><th>Гость</th><th>Транспорт</th><th>Прицеп</th>
         <th>Цель</th><th>Подал</th><th>Статус</th><th>Утверждено</th>
       </tr>
@@ -166,6 +177,74 @@
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeH8oRpI620YYlDC6_oMVKITTTy4bSe2iS_ipEjPKlqbVNk6p73UhZcHqs-1enBTAu/exec';
   const WA_PHONE = '37122008858'; // Олег — на время теста тот же номер, что и в форме заявки
 
+  const STR = {
+    ru: {
+      h1: 'Статус заявок',
+      subtitle: 'BMGS Tvaika 27 — все заявки и их состояние',
+      btnRefresh: 'Обновить',
+      optWeek: 'Последняя неделя', optMonth: 'Текущий месяц', optAll: 'Весь период', optCustom: 'Свой период…',
+      btnExport: 'Скачать / Распечатать (PDF)',
+      labelPending: 'В рассмотрении', labelApproved: 'Утверждено',
+      chipApproved: 'Утверждено', chipPending: 'В рассмотрении',
+      nudge: 'Напомнить Олегу',
+      nudgeText: 'Напоминание: заявка на въезд ещё ждёт подтверждения.',
+      submittedBy: 'подал',
+      emptyPending: 'Нет заявок в ожидании.',
+      loadFail: 'Не удалось загрузить список. Проверьте связь и нажмите «Обновить».',
+      noRowsInRange: 'Нет заявок за выбранный период',
+      printTitle: 'Заявки на въезд — BMGS Tvaika 27',
+      period: 'Период', generated: 'сформировано', total: 'всего заявок',
+      rangeWeek: 'последние 7 дней', rangeMonth: 'текущий месяц', rangeAll: 'весь период',
+      th: ['Дата','Время','Гость','Транспорт','Прицеп','Цель','Подал','Статус','Утверждено'],
+      locale: 'ru-RU',
+      txtVisit: 'Дата:', txtGuest: 'Гость:', txtTransport: 'Транспорт:', regNum: 'рег. номер', txtSubmitted: 'Заявку подал:'
+    },
+    lv: {
+      h1: 'Pieteikumu statuss',
+      subtitle: 'BMGS Tvaika 27 — visi pieteikumi un to statuss',
+      btnRefresh: 'Atjaunot',
+      optWeek: 'Pēdējā nedēļa', optMonth: 'Šis mēnesis', optAll: 'Viss periods', optCustom: 'Pielāgots periods…',
+      btnExport: 'Lejupielādēt / Drukāt (PDF)',
+      labelPending: 'Izskatīšanā', labelApproved: 'Apstiprināts',
+      chipApproved: 'Apstiprināts', chipPending: 'Izskatīšanā',
+      nudge: 'Atgādināt Olegam',
+      nudgeText: 'Atgādinājums: iebraukšanas pieteikums vēl gaida apstiprinājumu.',
+      submittedBy: 'iesniedza',
+      emptyPending: 'Nav pieteikumu, kas gaida izskatīšanu.',
+      loadFail: 'Neizdevās ielādēt sarakstu. Pārbaudiet savienojumu un nospiediet «Atjaunot».',
+      noRowsInRange: 'Izvēlētajā periodā nav pieteikumu',
+      printTitle: 'Iebraukšanas pieteikumi — BMGS Tvaika 27',
+      period: 'Periods', generated: 'sagatavots', total: 'pieteikumu kopā',
+      rangeWeek: 'pēdējās 7 dienas', rangeMonth: 'šis mēnesis', rangeAll: 'viss periods',
+      th: ['Datums','Laiks','Viesis','Transports','Piekabe','Mērķis','Iesniedza','Statuss','Apstiprināts'],
+      locale: 'lv-LV',
+      txtVisit: 'Datums:', txtGuest: 'Viesis:', txtTransport: 'Transports:', regNum: 'reģ. numurs', txtSubmitted: 'Iesniedza:'
+    }
+  };
+
+  let lang = localStorage.getItem('propusk_lang') || 'ru';
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = STR[lang][el.dataset.i18n];
+    });
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    $('printTitle').textContent = STR[lang].printTitle;
+    $('printHeadRow').innerHTML = STR[lang].th.map(t => '<th>' + t + '</th>').join('');
+    load();
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang;
+      localStorage.setItem('propusk_lang', lang);
+      applyLang();
+    });
+  });
+
   function toast(msg) {
     const t = $('toast');
     t.textContent = msg; t.classList.add('show');
@@ -177,18 +256,28 @@
     const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML;
   }
 
+  function fmtTime(t) {
+    // На случай старых испорченных строк (Sheets когда-то превратила "14:40"
+    // в служебную дату вида "1899-12-30T14:40:26.000Z") — вытаскиваем чистое HH:mm.
+    if (typeof t === 'string' && t.indexOf('1899-12-30T') === 0) {
+      return t.slice(11, 16);
+    }
+    return t;
+  }
+
   function chip(status) {
     return status === 'approved'
-      ? '<span class="chip chip-approved">Утверждено</span>'
-      : '<span class="chip chip-pending">В рассмотрении</span>';
+      ? '<span class="chip chip-approved">' + STR[lang].chipApproved + '</span>'
+      : '<span class="chip chip-pending">' + STR[lang].chipPending + '</span>';
   }
 
   function nudgeUrl(r) {
-    const text = 'Напоминание: заявка на въезд ещё ждёт подтверждения.\n' +
-      'Дата: ' + r.date + ', ' + r.time + '\n' +
-      'Гость: ' + r.guest + '\n' +
-      'Транспорт: ' + r.model + ', рег. номер ' + r.plate + '\n' +
-      'Заявку подал: ' + r.responsible;
+    const T = STR[lang];
+    const text = T.nudgeText + '\n' +
+      T.txtVisit + ' ' + r.date + ', ' + fmtTime(r.time) + '\n' +
+      T.txtGuest + ' ' + r.guest + '\n' +
+      T.txtTransport + ' ' + r.model + ', ' + T.regNum + ' ' + r.plate + '\n' +
+      T.txtSubmitted + ' ' + r.responsible;
     return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(text);
   }
 
@@ -196,9 +285,9 @@
     let html = '<div class="req">';
     html += '<div class="req-top"><div class="plate">' + esc(r.plate) + '</div>' + chip(r.status) + '</div>';
     html += '<div class="req-meta"><b>' + esc(r.guest) + '</b> · ' + esc(r.model) + '</div>';
-    html += '<div class="req-meta">' + esc(r.date) + ', ' + esc(r.time) + ' · подал ' + esc(r.responsible) + '</div>';
+    html += '<div class="req-meta">' + esc(r.date) + ', ' + esc(fmtTime(r.time)) + ' · ' + STR[lang].submittedBy + ' ' + esc(r.responsible) + '</div>';
     if (r.status === 'pending') {
-      html += '<a class="btn-nudge" href="' + nudgeUrl(r) + '" target="_top" rel="noopener">Напомнить Олегу</a>';
+      html += '<a class="btn-nudge" href="' + nudgeUrl(r) + '" target="_top" rel="noopener">' + STR[lang].nudge + '</a>';
     }
     html += '</div>';
     return html;
@@ -217,16 +306,17 @@
   });
 
   function getRange() {
+    const T = STR[lang];
     const mode = $('rangeSelect').value;
     const now = new Date();
     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
     if (mode === 'week') {
       const from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-      return { from: from, to: todayEnd, label: 'последние 7 дней' };
+      return { from: from, to: todayEnd, label: T.rangeWeek };
     }
     if (mode === 'month') {
       const from = new Date(now.getFullYear(), now.getMonth(), 1);
-      return { from: from, to: todayEnd, label: 'текущий месяц' };
+      return { from: from, to: todayEnd, label: T.rangeMonth };
     }
     if (mode === 'custom') {
       const fromVal = $('dateFrom').value, toVal = $('dateTo').value;
@@ -234,10 +324,11 @@
       const to = toVal ? new Date(toVal + 'T23:59:59') : todayEnd;
       return { from: from, to: to, label: (fromVal || '…') + ' — ' + (toVal || '…') };
     }
-    return { from: null, to: null, label: 'весь период' };
+    return { from: null, to: null, label: T.rangeAll };
   }
 
   function exportPrint() {
+    const T = STR[lang];
     const range = getRange();
     let rows = allRequests.slice();
     if (range.from) rows = rows.filter(r => parseDate(r.date) >= range.from);
@@ -245,24 +336,24 @@
     rows.sort((a, b) => parseDate(a.date) - parseDate(b.date) || (a.time < b.time ? -1 : 1));
 
     if (!rows.length) {
-      toast('Нет заявок за выбранный период');
+      toast(T.noRowsInRange);
       return;
     }
 
-    $('printMeta').textContent = 'Период: ' + range.label + ' · сформировано ' +
-      new Date().toLocaleDateString('ru-RU') + ' ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) +
-      ' · всего заявок: ' + rows.length;
+    $('printMeta').textContent = T.period + ': ' + range.label + ' · ' + T.generated + ' ' +
+      new Date().toLocaleDateString(T.locale) + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }) +
+      ' · ' + T.total + ': ' + rows.length;
 
     $('printBody').innerHTML = rows.map(r =>
       '<tr>' +
       '<td>' + esc(r.date) + '</td>' +
-      '<td>' + esc(r.time) + '</td>' +
+      '<td>' + esc(fmtTime(r.time)) + '</td>' +
       '<td>' + esc(r.guest) + '</td>' +
       '<td>' + esc(r.model) + ' ' + esc(r.plate) + '</td>' +
       '<td>' + (r.trailer ? esc(r.trailerModel) + ' ' + esc(r.trailerPlate) : '—') + '</td>' +
       '<td>' + esc(r.purpose || '—') + '</td>' +
       '<td>' + esc(r.responsible) + '</td>' +
-      '<td>' + (r.status === 'approved' ? 'Утверждено' : 'В рассмотрении') + '</td>' +
+      '<td>' + (r.status === 'approved' ? T.chipApproved : T.chipPending) + '</td>' +
       '<td>' + (r.approvedAt ? esc(String(r.approvedAt).slice(0, 16)) : '—') + '</td>' +
       '</tr>'
     ).join('');
@@ -285,19 +376,19 @@
 
       $('pendingLabel').style.display = pending.length ? 'block' : 'none';
       $('pendingList').innerHTML = pending.length ? pending.map(reqCard).join('') :
-        '<div class="empty">Нет заявок в ожидании.</div>';
+        '<div class="empty">' + STR[lang].emptyPending + '</div>';
 
       $('approvedLabel').style.display = approved.length ? 'block' : 'none';
       $('approvedList').innerHTML = approved.length ? approved.map(reqCard).join('') : '';
     } catch (e) {
-      $('pendingList').innerHTML = '<div class="empty">Не удалось загрузить список. Проверьте связь и нажмите «Обновить».</div>';
+      $('pendingList').innerHTML = '<div class="empty">' + STR[lang].loadFail + '</div>';
       console.error(e);
     }
-    $('refreshBtn').textContent = 'Обновить';
+    $('refreshBtn').textContent = STR[lang].btnRefresh;
   }
 
   $('refreshBtn').addEventListener('click', load);
-  load();
+  applyLang();
 })();
 </script>
 

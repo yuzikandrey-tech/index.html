@@ -55,6 +55,11 @@
     background: repeating-linear-gradient(-45deg, var(--stripe-b), var(--stripe-b) 14px, var(--stripe-a) 14px, var(--stripe-a) 28px); }
   header { background: var(--surface); border-bottom: 1px solid var(--border); }
   .header-inner { padding: 18px 18px 16px; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .lang-switch { display: flex; gap: 4px; flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+  .lang-btn { appearance: none; border: none; background: transparent; color: var(--text-muted); font-family: inherit;
+    font-weight: 700; font-size: 12px; padding: 6px 11px; border-radius: 999px; cursor: pointer; }
+  .lang-btn.active { background: var(--text); color: var(--bg); }
   h1 { margin: 0 0 3px; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
   .subtitle { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
   main { max-width: 560px; margin: 0 auto; padding: 16px 14px 48px; }
@@ -85,8 +90,16 @@
 <header>
   <div class="stripes"></div>
   <div class="header-inner">
-    <h1>Подтверждение заявок</h1>
-    <p class="subtitle" id="subtitle">Проверьте заявку, введите код и перешлите на пункт охраны.</p>
+    <div class="header-top">
+      <div>
+        <h1 data-i18n="h1">Подтверждение заявок</h1>
+        <p class="subtitle" id="subtitle" data-i18n="subtitle">Проверьте заявку, введите код и перешлите на пункт охраны.</p>
+      </div>
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="ru">RU</button>
+        <button class="lang-btn" data-lang="lv">LV</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -103,6 +116,64 @@
   // ЗАМЕНИ на адрес твоего Apps Script веб-приложения (заканчивается на /exec)
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeH8oRpI620YYlDC6_oMVKITTTy4bSe2iS_ipEjPKlqbVNk6p73UhZcHqs-1enBTAu/exec';
 
+  const STR = {
+    ru: {
+      h1: 'Подтверждение заявок',
+      subtitle: 'Проверьте заявку, введите код и перешлите на пункт охраны.',
+      fVisit: 'Дата и время визита', fGuest: 'Гость', fTransport: 'Транспорт', fTrailer: 'Прицеп',
+      fPurpose: 'Цель визита', fSubmitted: 'Заявку подал', fPin: 'Код подтверждения',
+      btnApprove: 'Утвердить и переслать на КПП', btnApproving: '...',
+      empty: 'Нет заявок, ожидающих подтверждения.',
+      loading: 'Загрузка…',
+      loadFail: 'Не удалось загрузить список. Проверьте связь и перезагрузите страницу.',
+      toastOk: 'Утверждено — открываю WhatsApp',
+      toastWrong: 'Неверный код',
+      toastErr: 'Ошибка — попробуйте ещё раз',
+      toastNoConn: 'Нет связи с сервером',
+      waHeader: 'Пропуск подтверждён, направляю на КПП:',
+      txtVisit: 'Дата и время визита:', txtGuest: 'Гость (ФИО / компания):', txtTransport: 'Транспорт:',
+      txtTrailer: 'Прицеп:', txtPurpose: 'Цель визита:', txtSubmitted: 'Заявку подал:', regNum: 'рег. номер'
+    },
+    lv: {
+      h1: 'Pieteikumu apstiprināšana',
+      subtitle: 'Pārbaudiet pieteikumu, ievadiet kodu un pārsūtiet uz apsardzes posteni.',
+      fVisit: 'Vizītes datums un laiks', fGuest: 'Viesis', fTransport: 'Transports', fTrailer: 'Piekabe',
+      fPurpose: 'Vizītes mērķis', fSubmitted: 'Pieteikumu iesniedza', fPin: 'Apstiprinājuma kods',
+      btnApprove: 'Apstiprināt un pārsūtīt uz posteni', btnApproving: '...',
+      empty: 'Nav pieteikumu, kas gaida apstiprinājumu.',
+      loading: 'Ielāde…',
+      loadFail: 'Neizdevās ielādēt sarakstu. Pārbaudiet savienojumu un pārlādējiet lapu.',
+      toastOk: 'Apstiprināts — atveru WhatsApp',
+      toastWrong: 'Nepareizs kods',
+      toastErr: 'Kļūda — mēģiniet vēlreiz',
+      toastNoConn: 'Nav savienojuma ar serveri',
+      waHeader: 'Caurlaide apstiprināta, nosūtu uz posteni:',
+      txtVisit: 'Vizītes datums un laiks:', txtGuest: 'Viesis (vārds, uzvārds / uzņēmums):', txtTransport: 'Transports:',
+      txtTrailer: 'Piekabe:', txtPurpose: 'Vizītes mērķis:', txtSubmitted: 'Pieteikumu iesniedza:', regNum: 'reģ. numurs'
+    }
+  };
+
+  let lang = localStorage.getItem('propusk_lang') || 'ru';
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = STR[lang][el.dataset.i18n];
+    });
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    load();
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang;
+      localStorage.setItem('propusk_lang', lang);
+      applyLang();
+    });
+  });
+
   function toast(msg) {
     const t = $('toast');
     t.textContent = msg; t.classList.add('show');
@@ -114,42 +185,51 @@
     const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML;
   }
 
+  function fmtTime(t) {
+    if (typeof t === 'string' && t.indexOf('1899-12-30T') === 0) {
+      return t.slice(11, 16);
+    }
+    return t;
+  }
+
   function buildText(r) {
+    const T = STR[lang];
     const lines = [];
-    lines.push('Дата и время визита: ' + r.date + (r.time ? ', ' + r.time : ''));
-    lines.push('Гость (ФИО / компания): ' + r.guest);
-    lines.push('Транспорт: ' + r.model + ', рег. номер ' + r.plate);
-    if (r.trailer) lines.push('Прицеп: ' + (r.trailerModel || '—') + ', рег. номер ' + r.trailerPlate);
-    if (r.purpose) lines.push('Цель визита: ' + r.purpose);
-    lines.push('Заявку подал: ' + r.responsible);
+    lines.push(T.txtVisit + ' ' + r.date + (r.time ? ', ' + fmtTime(r.time) : ''));
+    lines.push(T.txtGuest + ' ' + r.guest);
+    lines.push(T.txtTransport + ' ' + r.model + ', ' + T.regNum + ' ' + r.plate);
+    if (r.trailer) lines.push(T.txtTrailer + ' ' + (r.trailerModel || '—') + ', ' + T.regNum + ' ' + r.trailerPlate);
+    if (r.purpose) lines.push(T.txtPurpose + ' ' + r.purpose);
+    lines.push(T.txtSubmitted + ' ' + r.responsible);
     return lines.join('\n');
   }
 
   function waUrl(r) {
-    const text = 'Пропуск подтверждён, направляю на КПП:\n' + buildText(r);
+    const text = STR[lang].waHeader + '\n' + buildText(r);
     return 'https://wa.me/' + KPP_PHONE + '?text=' + encodeURIComponent(text);
   }
 
   function reqCard(r) {
+    const T = STR[lang];
     let html = '<div class="card" data-id="' + esc(r.id) + '">';
-    html += '<div class="field"><div class="field-label">Дата и время визита</div><div class="field-value">' + esc(r.date) + (r.time ? ', ' + esc(r.time) : '') + '</div></div>';
-    html += '<div class="field"><div class="field-label">Гость</div><div class="field-value">' + esc(r.guest) + '</div></div>';
-    html += '<div class="field"><div class="field-label">Транспорт</div><div class="field-value mono">' + esc(r.plate) + '</div><div class="field-value">' + esc(r.model) + '</div></div>';
+    html += '<div class="field"><div class="field-label">' + T.fVisit + '</div><div class="field-value">' + esc(r.date) + (r.time ? ', ' + esc(fmtTime(r.time)) : '') + '</div></div>';
+    html += '<div class="field"><div class="field-label">' + T.fGuest + '</div><div class="field-value">' + esc(r.guest) + '</div></div>';
+    html += '<div class="field"><div class="field-label">' + T.fTransport + '</div><div class="field-value mono">' + esc(r.plate) + '</div><div class="field-value">' + esc(r.model) + '</div></div>';
     if (r.trailer) {
-      html += '<div class="field"><div class="field-label">Прицеп</div><div class="field-value mono">' + esc(r.trailerPlate) + '</div><div class="field-value">' + esc(r.trailerModel || '—') + '</div></div>';
+      html += '<div class="field"><div class="field-label">' + T.fTrailer + '</div><div class="field-value mono">' + esc(r.trailerPlate) + '</div><div class="field-value">' + esc(r.trailerModel || '—') + '</div></div>';
     }
     if (r.purpose) {
-      html += '<div class="field"><div class="field-label">Цель визита</div><div class="field-value">' + esc(r.purpose) + '</div></div>';
+      html += '<div class="field"><div class="field-label">' + T.fPurpose + '</div><div class="field-value">' + esc(r.purpose) + '</div></div>';
     }
-    html += '<div class="field"><div class="field-label">Заявку подал</div><div class="field-value">' + esc(r.responsible) + '</div></div>';
+    html += '<div class="field"><div class="field-label">' + T.fSubmitted + '</div><div class="field-value">' + esc(r.responsible) + '</div></div>';
     html += '<div class="field" style="margin-top:14px;">';
-    html += '<div class="field-label" style="margin-bottom:6px;">Код подтверждения</div>';
+    html += '<div class="field-label" style="margin-bottom:6px;">' + T.fPin + '</div>';
     html += '<input type="text" inputmode="numeric" maxlength="8" placeholder="····" data-pin ' +
       'style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;' +
       'padding:12px;font-family:\'IBM Plex Mono\',monospace;font-size:20px;letter-spacing:0.3em;' +
       'text-align:center;color:var(--text);outline:none;">';
     html += '</div>';
-    html += '<button class="btn btn-go" data-approve>Утвердить и переслать на КПП</button>';
+    html += '<button class="btn btn-go" data-approve>' + T.btnApprove + '</button>';
     html += '</div>';
     return html;
   }
@@ -157,20 +237,20 @@
   let requestsById = {};
 
   async function load() {
-    $('list').innerHTML = '<div class="empty">Загрузка…</div>';
+    $('list').innerHTML = '<div class="empty">' + STR[lang].loading + '</div>';
     try {
       const res = await fetch(SCRIPT_URL, { method: 'GET' });
       const data = await res.json();
       if (!data.ok) throw new Error('bad response');
       if (!data.requests.length) {
-        $('list').innerHTML = '<div class="empty">Нет заявок, ожидающих подтверждения.</div>';
+        $('list').innerHTML = '<div class="empty">' + STR[lang].empty + '</div>';
         return;
       }
       requestsById = {};
       data.requests.forEach(r => { requestsById[r.id] = r; });
       $('list').innerHTML = data.requests.map(reqCard).join('');
     } catch (e) {
-      $('list').innerHTML = '<div class="empty">Не удалось загрузить список. Проверьте связь и перезагрузите страницу.</div>';
+      $('list').innerHTML = '<div class="empty">' + STR[lang].loadFail + '</div>';
       console.error(e);
     }
   }
@@ -182,7 +262,7 @@
     const id = card.dataset.id;
     const pin = card.querySelector('[data-pin]').value.trim();
     btn.disabled = true;
-    btn.textContent = '...';
+    btn.textContent = STR[lang].btnApproving;
     try {
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
@@ -197,28 +277,28 @@
         a.target = '_top';
         a.rel = 'noopener';
         a.click();
-        toast('Утверждено — открываю WhatsApp');
+        toast(STR[lang].toastOk);
         load();
       } else if (data.error === 'wrong_pin') {
-        toast('Неверный код');
+        toast(STR[lang].toastWrong);
         card.querySelector('[data-pin]').value = '';
         card.querySelector('[data-pin]').focus();
         btn.disabled = false;
-        btn.textContent = 'Утвердить и переслать на КПП';
+        btn.textContent = STR[lang].btnApprove;
       } else {
-        toast('Ошибка — попробуйте ещё раз');
+        toast(STR[lang].toastErr);
         btn.disabled = false;
-        btn.textContent = 'Утвердить и переслать на КПП';
+        btn.textContent = STR[lang].btnApprove;
       }
     } catch (err) {
       console.error(err);
-      toast('Нет связи с сервером');
+      toast(STR[lang].toastNoConn);
       btn.disabled = false;
-      btn.textContent = 'Утвердить и переслать на КПП';
+      btn.textContent = STR[lang].btnApprove;
     }
   });
 
-  load();
+  applyLang();
 })();
 </script>
 
