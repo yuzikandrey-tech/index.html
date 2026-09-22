@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Заявка на въезд — BMGS Tvaika 27</title>
+<meta property="og:title" content="Заявка на въезд — BMGS Tvaika 27">
+<meta property="og:description" content="Форма заявки на въезд транспорта на территорию BMGS, Tvaika iela 27">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f3;
+    --surface: #ffffff;
+    --surface-2: #f4f6f7;
+    --border: #d8dee2;
+    --text: #1b2226;
+    --text-muted: #647079;
+    --accent: #3a6fa8;
+    --accent-bg: #e7eef7;
+    --warn: #b8863a;
+    --warn-bg: #fbf1de;
+    --stripe-a: #1b2226;
+    --stripe-b: #d99a3d;
+    --shadow: 0 1px 2px rgba(20,26,30,0.06), 0 4px 14px rgba(20,26,30,0.05);
+    --radius: 12px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12171b; --surface: #1a2127; --surface-2: #212a31; --border: #303b43;
+      --text: #e9edf0; --text-muted: #93a1aa;
+      --accent: #6ea3d6; --accent-bg: #142a3d;
+      --warn: #d9a54a; --warn-bg: #362a13;
+      --stripe-a: #0c0f11; --stripe-b: #d9a54a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12171b; --surface: #1a2127; --surface-2: #212a31; --border: #303b43;
+    --text: #e9edf0; --text-muted: #93a1aa;
+    --accent: #6ea3d6; --accent-bg: #142a3d;
+    --warn: #d9a54a; --warn-bg: #362a13;
+    --stripe-a: #0c0f11; --stripe-b: #d9a54a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.35);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); min-height: 100%; }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+  .stripes { height: 6px; width: 100%;
+    background: repeating-linear-gradient(-45deg, var(--stripe-b), var(--stripe-b) 14px, var(--stripe-a) 14px, var(--stripe-a) 28px); }
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .header-inner { padding: 18px 18px 16px; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .lang-switch { display: flex; gap: 4px; flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+  .lang-btn { appearance: none; border: none; background: transparent; color: var(--text-muted); font-family: inherit;
+    font-weight: 700; font-size: 12px; padding: 6px 11px; border-radius: 999px; cursor: pointer; }
+  .lang-btn.active { background: var(--text); color: var(--bg); }
+  h1 { margin: 0 0 3px; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+  .subtitle { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  main { max-width: 560px; margin: 0 auto; padding: 16px 14px 48px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px; margin-bottom: 12px; }
+  .badge-trial { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700;
+    color: var(--warn); background: var(--warn-bg); padding: 5px 10px; border-radius: 999px; margin-bottom: 12px; }
+  label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin: 14px 0 5px; }
+  label:first-of-type { margin-top: 0; }
+  input[type="text"], input[type="date"], input[type="time"], textarea {
+    width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px;
+    padding: 10px 12px; font-family: 'Manrope', sans-serif; font-size: 15px; color: var(--text); outline: none; }
+  input.mono { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em; }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 44px; font-family: 'Manrope', sans-serif; }
+  .row2 { display: flex; gap: 10px; }
+  .row2 > div { flex: 1; }
+  .row-check { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; }
+  .row-check input[type="checkbox"] { width: 17px; height: 17px; }
+  .row-check span { font-size: 13.5px; font-weight: 600; color: var(--text); }
+  .btn { appearance: none; border: none; border-radius: 10px; padding: 13px 16px; font-family: inherit;
+    font-weight: 700; font-size: 14.5px; cursor: pointer; width: 100%; margin-top: 18px; }
+  .btn-primary { background: var(--text); color: var(--bg); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); margin-top: 8px; }
+  .result-title { font-size: 13px; font-weight: 700; color: var(--text-muted); margin: 0 0 10px; }
+  .result-box { white-space: pre-wrap; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px; line-height: 1.6; }
+  .hint { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: var(--bg); padding: 11px 18px; border-radius: 999px; font-size: 13.5px; font-weight: 700;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 50; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #resultCard { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="stripes"></div>
+  <div class="header-inner">
+    <div class="header-top">
+      <div>
+        <h1 data-i18n="h1">Заявка на въезд — Tvaika 27</h1>
+        <p class="subtitle" data-i18n="subtitle">Заполните форму — откроется письмо для отправки начальнику охраны на согласование.</p>
+      </div>
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="ru">RU</button>
+        <button class="lang-btn" data-lang="lv">LV</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <span class="badge-trial" data-i18n="badge">🧪 Пробная версия — письма идут на тестовый адрес</span>
+
+    <label for="f-date" data-i18n="l-date">Дата визита</label>
+    <div class="row2">
+      <div><input type="date" id="f-date"></div>
+      <div><input type="time" id="f-time"></div>
+    </div>
+
+    <label for="f-guest" data-i18n="l-guest">Гость: ФИО или название компании</label>
+    <input type="text" id="f-guest" data-i18n-ph="ph-guest" placeholder="Иванов Иван / ООО «Компания»">
+
+    <label for="f-plate" data-i18n="l-plate">Номер автомобиля</label>
+    <input type="text" id="f-plate" class="mono" placeholder="AB-1234" autocapitalize="characters">
+
+    <label for="f-model" data-i18n="l-model">Марка и модель</label>
+    <input type="text" id="f-model" data-i18n-ph="ph-model" placeholder="Volvo FH">
+
+    <div class="row-check">
+      <input type="checkbox" id="f-has-trailer">
+      <span data-i18n="l-hastrailer">С прицепом</span>
+    </div>
+    <div id="f-trailer-wrap" style="display:none">
+      <label for="f-trailer-plate" data-i18n="l-trailerplate">Номер прицепа</label>
+      <input type="text" id="f-trailer-plate" class="mono" placeholder="CD-5678" autocapitalize="characters">
+      <label for="f-trailer-model" data-i18n="l-trailermodel">Марка и модель прицепа</label>
+      <input type="text" id="f-trailer-model" data-i18n-ph="ph-trailermodel" placeholder="Krone">
+    </div>
+
+    <label for="f-purpose" data-i18n="l-purpose">Цель визита</label>
+    <textarea id="f-purpose" data-i18n-ph="ph-purpose" placeholder="Например: доставка материалов на объект"></textarea>
+
+    <label for="f-responsible" data-i18n="l-responsible">Заявку подаёт (ответственный)</label>
+    <input type="text" id="f-responsible" data-i18n-ph="ph-responsible" placeholder="Ваше имя и фамилия">
+
+    <button class="btn btn-primary" id="f-submit" disabled data-i18n="btn-submit">Подготовить письмо</button>
+  </div>
+
+  <div class="card" id="resultCard">
+    <p class="result-title" data-i18n="result-title">Заявка на согласование</p>
+    <div class="result-box" id="resultText"></div>
+    <a class="btn btn-primary" id="openWaLink" href="#" target="_top" rel="noopener" style="display:block; text-align:center; text-decoration:none; background:#3fa76b;" data-i18n="btn-wa">Отправить в WhatsApp (тест)</a>
+    <a class="btn btn-secondary" id="openMailLink" href="#" target="_top" rel="noopener" style="display:block; text-align:center; text-decoration:none;" data-i18n="btn-mail">Или открыть почтовое приложение</a>
+    <button class="btn btn-secondary" id="copyBtn" data-i18n="btn-copy">Скопировать текст</button>
+    <p class="hint" data-i18n="hint">Если ни одна из кнопок ничего не открывает — скопируйте текст выше и отправьте вручную в WhatsApp (+371 22008858) или на <b>dezar@kront.eu</b>.</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<a id="mailAnchor" href="#" target="_top" rel="noopener" style="position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;"></a>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const RECIPIENT = 'dezar@kront.eu';
+  const WA_PHONE = '37122008858'; // тестовый номер (Андрей) — на время пробного запуска
+  // ЗАМЕНИ на адрес твоего Apps Script веб-приложения (заканчивается на /exec)
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeH8oRpI620YYlDC6_oMVKITTTy4bSe2iS_ipEjPKlqbVNk6p73UhZcHqs-1enBTAu/exec';
+  const CONFIRM_URL = 'https://yuzikandrey-tech.github.io/index.html/propusk-vezd/confirm.html';
+
+  const STR = {
+    ru: {
+      h1: 'Заявка на въезд — Tvaika 27',
+      subtitle: 'Заполните форму — откроется письмо для отправки начальнику охраны на согласование.',
+      badge: '🧪 Пробная версия — письма идут на тестовый адрес',
+      'l-date': 'Дата визита',
+      'l-guest': 'Гость: ФИО или название компании',
+      'ph-guest': 'Иванов Иван / ООО «Компания»',
+      'l-plate': 'Номер автомобиля',
+      'l-model': 'Марка и модель',
+      'ph-model': 'Volvo FH',
+      'l-hastrailer': 'С прицепом',
+      'l-trailerplate': 'Номер прицепа',
+      'l-trailermodel': 'Марка и модель прицепа',
+      'ph-trailermodel': 'Krone',
+      'l-purpose': 'Цель визита',
+      'ph-purpose': 'Например: доставка материалов на объект',
+      'l-responsible': 'Заявку подаёт (ответственный)',
+      'ph-responsible': 'Ваше имя и фамилия',
+      'btn-submit': 'Подготовить письмо',
+      'btn-submit-saving': 'Сохраняю...',
+      'result-title': 'Заявка на согласование',
+      'btn-wa': 'Отправить в WhatsApp (тест)',
+      'btn-mail': 'Или открыть почтовое приложение',
+      'btn-copy': 'Скопировать текст',
+      hint: 'Если ни одна из кнопок ничего не открывает — скопируйте текст выше и отправьте вручную в WhatsApp (+371 22008858) или на <b>dezar@kront.eu</b>.',
+      toastSaveFail: 'Не удалось сохранить заявку — проверьте связь и попробуйте ещё раз',
+      toastCopyOk: 'Текст скопирован',
+      toastCopyFail: 'Не удалось скопировать — выделите текст вручную',
+      resultTo: 'Кому',
+      resultOr: 'или',
+      waTitle: 'Заявка на въезд — BMGS Tvaika 27',
+      waDate: 'Дата и время визита:',
+      waGuest: 'Гость:',
+      waTransport: 'Транспорт:',
+      waTrailer: 'Прицеп:',
+      waPurpose: 'Цель визита:',
+      waSubmitted: 'Заявку подал:',
+      waConfirmLink: 'Открыть список заявок на подтверждение:',
+      txtVisit: 'Дата и время визита:',
+      txtGuest: 'Гость (ФИО / компания):',
+      txtTransport: 'Транспорт:',
+      txtTrailer: 'Прицеп:',
+      txtPurpose: 'Цель визита:',
+      txtSubmitted: 'Заявку подал:',
+      regNum: 'рег. номер'
+    },
+    lv: {
+      h1: 'Iebraukšanas pieteikums — Tvaika 27',
+      subtitle: 'Aizpildiet veidlapu — atvērsies vēstule nosūtīšanai drošības dienesta vadītājam saskaņošanai.',
+      badge: '🧪 Izmēģinājuma versija — vēstules tiek sūtītas uz testa adresi',
+      'l-date': 'Vizītes datums',
+      'l-guest': 'Viesis: vārds, uzvārds vai uzņēmuma nosaukums',
+      'ph-guest': 'Jānis Bērziņš / SIA «Uzņēmums»',
+      'l-plate': 'Transportlīdzekļa reģistrācijas numurs',
+      'l-model': 'Marka un modelis',
+      'ph-model': 'Volvo FH',
+      'l-hastrailer': 'Ar piekabi',
+      'l-trailerplate': 'Piekabes reģistrācijas numurs',
+      'l-trailermodel': 'Piekabes marka un modelis',
+      'ph-trailermodel': 'Krone',
+      'l-purpose': 'Vizītes mērķis',
+      'ph-purpose': 'Piemēram: materiālu piegāde objektā',
+      'l-responsible': 'Pieteicējs (atbildīgā persona)',
+      'ph-responsible': 'Jūsu vārds un uzvārds',
+      'btn-submit': 'Sagatavot vēstuli',
+      'btn-submit-saving': 'Saglabā...',
+      'result-title': 'Pieteikums saskaņošanai',
+      'btn-wa': 'Nosūtīt WhatsApp (tests)',
+      'btn-mail': 'Vai atvērt e-pasta lietotni',
+      'btn-copy': 'Kopēt tekstu',
+      hint: 'Ja neviena poga neatveras — nokopējiet tekstu augstāk un nosūtiet manuāli uz WhatsApp (+371 22008858) vai <b>dezar@kront.eu</b>.',
+      toastSaveFail: 'Neizdevās saglabāt pieteikumu — pārbaudiet savienojumu un mēģiniet vēlreiz',
+      toastCopyOk: 'Teksts nokopēts',
+      toastCopyFail: 'Neizdevās nokopēt — iezīmējiet tekstu manuāli',
+      resultTo: 'Kam',
+      resultOr: 'vai',
+      waTitle: 'Iebraukšanas pieteikums — BMGS Tvaika 27',
+      waDate: 'Vizītes datums un laiks:',
+      waGuest: 'Viesis:',
+      waTransport: 'Transports:',
+      waTrailer: 'Piekabe:',
+      waPurpose: 'Vizītes mērķis:',
+      waSubmitted: 'Pieteikumu iesniedza:',
+      waConfirmLink: 'Atvērt pieteikumu sarakstu apstiprināšanai:',
+      txtVisit: 'Vizītes datums un laiks:',
+      txtGuest: 'Viesis (vārds, uzvārds / uzņēmums):',
+      txtTransport: 'Transports:',
+      txtTrailer: 'Piekabe:',
+      txtPurpose: 'Vizītes mērķis:',
+      txtSubmitted: 'Pieteikumu iesniedza:',
+      regNum: 'reģ. numurs'
+    }
+  };
+
+  let lang = localStorage.getItem('propusk_lang') || 'ru';
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.innerHTML = STR[lang][el.dataset.i18n];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      el.setAttribute('placeholder', STR[lang][el.dataset.i18nPh]);
+    });
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang;
+      localStorage.setItem('propusk_lang', lang);
+      applyLang();
+    });
+  });
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._h);
+    toast._h = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  const hasTrailer = $('f-has-trailer');
+  const trailerWrap = $('f-trailer-wrap');
+  hasTrailer.addEventListener('change', () => {
+    trailerWrap.style.display = hasTrailer.checked ? 'block' : 'none';
+    validate();
+  });
+
+  ['f-plate', 'f-trailer-plate'].forEach(id => {
+    $(id).addEventListener('input', (e) => {
+      const pos = e.target.selectionStart;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(pos, pos);
+      validate();
+    });
+  });
+
+  ['f-date','f-time','f-guest','f-model','f-purpose','f-responsible','f-trailer-model'].forEach(id => {
+    $(id).addEventListener('input', validate);
+    $(id).addEventListener('change', validate);
+  });
+
+  function validate() {
+    const required = ['f-date','f-time','f-guest','f-plate','f-model','f-responsible'];
+    let ok = required.every(id => $(id).value.trim().length > 0);
+    if (hasTrailer.checked) {
+      ok = ok && $('f-trailer-plate').value.trim().length > 0;
+    }
+    $('f-submit').disabled = !ok;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return d + '.' + m + '.' + y;
+  }
+
+  function buildText() {
+    const T = STR[lang];
+    const lines = [];
+    lines.push(T.txtVisit + ' ' + fmtDate($('f-date').value) + ', ' + $('f-time').value);
+    lines.push(T.txtGuest + ' ' + $('f-guest').value.trim());
+    lines.push(T.txtTransport + ' ' + $('f-model').value.trim() + ', ' + T.regNum + ' ' + $('f-plate').value.trim());
+    if (hasTrailer.checked) {
+      lines.push(T.txtTrailer + ' ' + ($('f-trailer-model').value.trim() || '—') + ', ' + T.regNum + ' ' + $('f-trailer-plate').value.trim());
+    }
+    if ($('f-purpose').value.trim()) {
+      lines.push(T.txtPurpose + ' ' + $('f-purpose').value.trim());
+    }
+    lines.push(T.txtSubmitted + ' ' + $('f-responsible').value.trim());
+    return lines.join('\n');
+  }
+
+  function submitToBackend(payload) {
+    return fetch(SCRIPT_URL, {
+      method: 'POST',
+      // text/plain avoids a CORS preflight that Apps Script doesn't handle —
+      // the body is still valid JSON, just sent without the extra browser check.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(r => r.json());
+  }
+
+  function buildMailto() {
+    const subject = STR[lang].h1 + ' — ' + $('f-plate').value.trim() + ' — ' + fmtDate($('f-date').value);
+    const body = buildText() + '\n\n— ' + STR[lang].badge.replace('🧪 ', '');
+    return 'mailto:' + RECIPIENT + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+
+  function buildWhatsappText() {
+    const T = STR[lang];
+    const lines = [];
+    lines.push('*' + T.waTitle + '*');
+    lines.push('');
+    lines.push('*' + T.waDate + '*');
+    lines.push(fmtDate($('f-date').value) + ', ' + $('f-time').value);
+    lines.push('');
+    lines.push('*' + T.waGuest + '*');
+    lines.push($('f-guest').value.trim());
+    lines.push('');
+    lines.push('*' + T.waTransport + '*');
+    lines.push($('f-model').value.trim() + ', ' + T.regNum + ' ' + $('f-plate').value.trim());
+    if (hasTrailer.checked) {
+      lines.push('');
+      lines.push('*' + T.waTrailer + '*');
+      lines.push(($('f-trailer-model').value.trim() || '—') + ', ' + T.regNum + ' ' + $('f-trailer-plate').value.trim());
+    }
+    if ($('f-purpose').value.trim()) {
+      lines.push('');
+      lines.push('*' + T.waPurpose + '*');
+      lines.push($('f-purpose').value.trim());
+    }
+    lines.push('');
+    lines.push('*' + T.waSubmitted + '*');
+    lines.push($('f-responsible').value.trim());
+    lines.push('');
+    lines.push(T.waConfirmLink);
+    lines.push(CONFIRM_URL);
+    return lines.join('\n');
+  }
+
+  function buildWhatsapp() {
+    return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(buildWhatsappText());
+  }
+
+  let lastMailto = '';
+  let lastWa = '';
+
+  $('f-submit').addEventListener('click', async () => {
+    const btn = $('f-submit');
+    btn.disabled = true;
+    btn.textContent = STR[lang]['btn-submit-saving'];
+    try {
+      await submitToBackend({
+        action: 'submit',
+        date: fmtDate($('f-date').value),
+        time: $('f-time').value,
+        guest: $('f-guest').value.trim(),
+        plate: $('f-plate').value.trim(),
+        model: $('f-model').value.trim(),
+        trailer: hasTrailer.checked,
+        trailerPlate: hasTrailer.checked ? $('f-trailer-plate').value.trim() : '',
+        trailerModel: hasTrailer.checked ? $('f-trailer-model').value.trim() : '',
+        purpose: $('f-purpose').value.trim(),
+        responsible: $('f-responsible').value.trim()
+      });
+    } catch (e) {
+      console.error(e);
+      toast(STR[lang].toastSaveFail);
+      btn.disabled = false;
+      btn.textContent = STR[lang]['btn-submit'];
+      return;
+    }
+
+    lastMailto = buildMailto();
+    lastWa = buildWhatsapp();
+    const T = STR[lang];
+    $('resultText').textContent = T.resultTo + ': WhatsApp +371 22008858 (' + (lang === 'ru' ? 'тест' : 'tests') + ') ' + T.resultOr + ' ' + RECIPIENT + '\n\n' + buildText();
+    $('resultCard').style.display = 'block';
+    $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('openWaLink').href = lastWa;
+    $('openMailLink').href = lastMailto;
+    const wa = $('openWaLink');
+    wa.href = lastWa;
+    wa.click();
+
+    btn.disabled = false;
+    btn.textContent = STR[lang]['btn-submit'];
+  });
+
+  $('openWaLink').addEventListener('click', (e) => {
+    if (!lastWa) e.preventDefault();
+  });
+
+  $('openMailLink').addEventListener('click', (e) => {
+    if (!lastMailto) e.preventDefault();
+  });
+
+  $('copyBtn').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText($('resultText').textContent);
+      toast(STR[lang].toastCopyOk);
+    } catch (e) {
+      toast(STR[lang].toastCopyFail);
+    }
+  });
+
+  // default date to today
+  const today = new Date();
+  $('f-date').value = today.toISOString().slice(0,10);
+
+  applyLang();
+  validate();
+})();
+</script>
+
+</body>
+</html>
