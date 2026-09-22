@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Заявка на въезд — BMGS Tvaika 27</title>
-<meta property="og:title" content="Заявка на въезд — BMGS Tvaika 27">
-<meta property="og:description" content="Форма заявки на въезд транспорта на территорию BMGS, Tvaika iela 27">
+<title>Пропуск Tvaika 27 — BMGS</title>
+<meta property="og:title" content="Пропуск Tvaika 27 — BMGS">
+<meta property="og:description" content="Заявка на въезд транспорта на территорию BMGS, Tvaika iela 27">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="noindex">
@@ -59,6 +59,11 @@
     background: repeating-linear-gradient(-45deg, var(--stripe-b), var(--stripe-b) 14px, var(--stripe-a) 14px, var(--stripe-a) 28px); }
   header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); }
   .header-inner { padding: 18px 18px 16px; }
+  .nav-tabs { display: flex; gap: 6px; padding: 10px 18px 0; }
+  .nav-tab { appearance: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted);
+    font-family: inherit; font-weight: 700; font-size: 12.5px; padding: 7px 13px; border-radius: 999px;
+    text-decoration: none; }
+  .nav-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
   .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .lang-switch { display: flex; gap: 4px; flex-shrink: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
   .lang-btn { appearance: none; border: none; background: transparent; color: var(--text-muted); font-family: inherit;
@@ -115,6 +120,10 @@
         <button class="lang-btn" data-lang="lv">LV</button>
       </div>
     </div>
+  </div>
+  <div class="nav-tabs">
+    <a class="nav-tab active" href="./" data-i18n="navRequest">Заявка</a>
+    <a class="nav-tab" href="status.html" data-i18n="navStatus">Статус</a>
   </div>
 </header>
 
@@ -181,8 +190,10 @@
 
   const STR = {
     ru: {
-      h1: 'Заявка на въезд — Tvaika 27',
-      subtitle: 'Заполните форму — откроется письмо для отправки начальнику охраны на согласование.',
+      h1: 'Пропуск Tvaika 27',
+      navRequest: 'Заявка',
+      navStatus: 'Статус',
+      subtitle: 'Заполните заявку — она уйдёт на рассмотрение в службу безопасности.',
       badge: '🧪 Пробная версия — письма идут на тестовый адрес',
       'l-date': 'Дата визита',
       'l-guest': 'Гость: ФИО или название компании',
@@ -227,8 +238,10 @@
       regNum: 'рег. номер'
     },
     lv: {
-      h1: 'Iebraukšanas pieteikums — Tvaika 27',
-      subtitle: 'Aizpildiet veidlapu — atvērsies vēstule nosūtīšanai drošības dienesta vadītājam saskaņošanai.',
+      h1: 'Caurlaide Tvaika 27',
+      navRequest: 'Pieteikums',
+      navStatus: 'Statuss',
+      subtitle: 'Aizpildiet pieteikumu — tas tiks nosūtīts izskatīšanai drošības dienestam.',
       badge: '🧪 Izmēģinājuma versija — vēstules tiek sūtītas uz testa adresi',
       'l-date': 'Vizītes datums',
       'l-guest': 'Viesis: vārds, uzvārds vai uzņēmuma nosaukums',

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kontroles talons — BMGS Tvaika 27</title>
+<meta property="og:title" content="Kontroles talons — BMGS Tvaika 27">
+<meta property="og:description" content="Iebraukšanas kontroles talons apsardzes postenim">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f3; --surface: #ffffff; --surface-2: #f4f6f7; --border: #9aa1a6;
+    --text: #101315; --text-muted: #55606a;
+    --stripe-a: #1b2226; --stripe-b: #d99a3d;
+    --shadow: 0 1px 2px rgba(20,26,30,0.06), 0 4px 14px rgba(20,26,30,0.05);
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); min-height: 100%; }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+  .app-stripes { height: 6px; width: 100%;
+    background: repeating-linear-gradient(-45deg, var(--stripe-b), var(--stripe-b) 14px, var(--stripe-a) 14px, var(--stripe-a) 28px); }
+  .app-header { background: var(--surface); border-bottom: 1px solid #d8dee2; padding: 14px 16px; text-align: center; }
+  .app-header .note { font-size: 12px; color: var(--text-muted); }
+
+  main { max-width: 640px; margin: 0 auto; padding: 16px 12px 40px; }
+
+  .btn-print { appearance: none; border: none; border-radius: 10px; padding: 14px 16px; font-family: 'Manrope', sans-serif;
+    font-weight: 800; font-size: 15px; cursor: pointer; width: 100%; margin-top: 16px; background: #2f8f5b; color: #fff; }
+  .empty { text-align: center; padding: 60px 16px; color: var(--text-muted); font-family: 'Manrope', sans-serif; }
+
+  /* --- Kontroles talons replica --- */
+  .talon { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); font-size: 13px; }
+  .talon-titlebar { background: #1a1f22; color: #fff; text-align: center; font-weight: 800; letter-spacing: 0.04em;
+    font-size: 15px; padding: 8px; text-transform: uppercase; }
+  .talon-top { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .talon-logo { background: #1a1f22; color: #fff; font-weight: 800; font-size: 15px; padding: 6px 12px; letter-spacing: 0.02em; flex-shrink: 0; }
+  .talon-org div:first-child { font-weight: 700; }
+  .talon-org { font-size: 11.5px; line-height: 1.4; }
+
+  .talon-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .talon-col { border-right: 1px solid var(--border); }
+  .talon-col:last-child { border-right: none; }
+  .talon-col-head { background: #dfe3e6; font-weight: 800; text-align: center; padding: 6px; font-size: 12px; text-transform: uppercase; }
+  .talon-row { display: flex; border-bottom: 1px solid var(--border); min-height: 34px; }
+  .talon-row:last-child { border-bottom: none; }
+  .tl { flex: 0 0 46%; padding: 6px 8px; color: var(--text-muted); font-size: 11px; border-right: 1px solid var(--border); display: flex; align-items: center; }
+  .tv { flex: 1; padding: 6px 8px; font-weight: 700; display: flex; align-items: center; }
+  .check-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 11.5px; font-weight: 600; }
+  .check-row:last-child { border-bottom: none; }
+  .box { width: 16px; height: 16px; border: 1px solid var(--border); flex-shrink: 0; }
+
+  .talon-bottom-row { display: flex; border-top: 1px solid var(--border); min-height: 34px; }
+  .talon-bottom-row .tl { flex: 0 0 32%; }
+  .talon-bottom-row .tv { flex: 1; }
+  .talon-cargo { display: flex; align-items: center; gap: 8px; padding: 8px; border-top: 1px solid var(--border); font-size: 11.5px; font-weight: 600; }
+
+  .talon-sign { border-top: 1px solid var(--border); padding: 10px 8px; }
+  .talon-sign .tl { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 26px; display: block; }
+
+  @media (max-width: 480px) {
+    .talon-grid { grid-template-columns: 1fr; }
+    .talon-col { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  @media print {
+    .app-stripes, .app-header, .btn-print { display: none !important; }
+    body, main { padding: 0; margin: 0; max-width: none; background: #fff; }
+    .talon { box-shadow: none; }
+    .talon-grid { grid-template-columns: 1fr 1fr !important; }
+    .talon-col { border-right: 1px solid #000 !important; border-bottom: none !important; }
+    .talon, .talon-row, .talon-col, .talon-titlebar, .talon-top, .check-row, .talon-bottom-row, .talon-cargo, .talon-sign, .box, .talon-col-head {
+      border-color: #000 !important;
+    }
+    .talon-titlebar, .talon-logo, .talon-col-head { background: #000 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .talon-col-head { background: #ddd !important; color: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-stripes"></div>
+<div class="app-header">
+  <div class="note" id="statusNote">Ielāde…</div>
+</div>
+
+<main>
+  <div id="content"></div>
+</main>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeH8oRpI620YYlDC6_oMVKITTTy4bSe2iS_ipEjPKlqbVNk6p73UhZcHqs-1enBTAu/exec';
+
+  function esc(s) {
+    const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML;
+  }
+
+  function fmtTime(t) {
+    if (typeof t === 'string' && t.indexOf('1899-12-30T') === 0) return t.slice(11, 16);
+    return t;
+  }
+
+  function checkRows(n) {
+    let html = '';
+    for (let i = 0; i < n; i++) {
+      html += '<div class="check-row"><span class="box"></span> ATBILST</div>';
+    }
+    return html;
+  }
+
+  function render(r) {
+    let html = '<div class="talon">';
+    html += '<div class="talon-titlebar">Kontroles talons</div>';
+    html += '<div class="talon-top"><div class="talon-logo">BMGS</div><div class="talon-org">';
+    html += '<div>DROŠĪBAS DIENESTS</div><div>APSARDZES POSTENIS</div><div>Tvaika iela 27, Rīga</div>';
+    html += '</div></div>';
+
+    html += '<div class="talon-grid">';
+    html += '<div class="talon-col">';
+    html += '<div class="talon-col-head">Iebraukšana</div>';
+    html += '<div class="talon-row"><span class="tl">Datums un laiks</span><span class="tv">' + esc(r.date) + ', ' + esc(fmtTime(r.time)) + '</span></div>';
+    html += '<div class="talon-row"><span class="tl">Vārds un uzvārds</span><span class="tv">' + esc(r.guest) + '</span></div>';
+    html += '<div class="talon-row"><span class="tl">Vieglā automašīna VRN</span><span class="tv mono">' + esc(r.plate) + '</span></div>';
+    html += '<div class="talon-row"><span class="tl">Kravas automašīna VRN</span><span class="tv"></span></div>';
+    html += '<div class="talon-row"><span class="tl">Piekabe VRN</span><span class="tv mono">' + (r.trailer ? esc(r.trailerPlate) : '') + '</span></div>';
+    html += '<div class="talon-row"><span class="tl">Cits VRN</span><span class="tv"></span></div>';
+    html += '<div class="talon-row"><span class="tl">Papildinformācija</span><span class="tv">Pieteica: ' + esc(r.responsible) + '</span></div>';
+    html += '</div>';
+
+    html += '<div class="talon-col">';
+    html += '<div class="talon-col-head">Izbraukšana</div>';
+    html += checkRows(5);
+    html += '</div>';
+    html += '</div>'; // talon-grid
+
+    html += '<div class="talon-cargo"><span class="box"></span> BEZ KRAVAS</div>';
+    html += '<div class="talon-bottom-row"><span class="tl">Ierašanās iemesls</span><span class="tv">' + esc(r.purpose || '—') + '</span></div>';
+    html += '<div class="talon-sign"><span class="tl">Apsardzes darbinieks — vārds, uzvārds, paraksts:</span></div>';
+
+    html += '</div>'; // talon
+
+    html += '<button class="btn-print" id="printBtn">🖨️ Drukāt talonu</button>';
+    $('content').innerHTML = html;
+    $('printBtn').addEventListener('click', () => window.print());
+  }
+
+  async function load() {
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (!id) {
+      $('statusNote').textContent = '';
+      $('content').innerHTML = '<div class="empty">Saite atvērta bez pieteikuma norādes.</div>';
+      return;
+    }
+    try {
+      const res = await fetch(SCRIPT_URL + '?id=' + encodeURIComponent(id));
+      const data = await res.json();
+      $('statusNote').textContent = '';
+      if (!data.ok) {
+        $('content').innerHTML = '<div class="empty">Pieteikums nav atrasts vai saite ir novecojusi.</div>';
+        return;
+      }
+      render(data.request);
+    } catch (e) {
+      $('statusNote').textContent = '';
+      $('content').innerHTML = '<div class="empty">Neizdevās ielādēt talona datus.</div>';
+      console.error(e);
+    }
+  }
+
+  load();
+})();
+</script>
+
+</body>
+</html>
