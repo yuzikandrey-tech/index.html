@@ -85,13 +85,13 @@
 <header>
   <div class="stripes"></div>
   <div class="header-inner">
-    <h1>Подтверждение заявки</h1>
-    <p class="subtitle" id="subtitle">Проверьте данные и перешлите на пункт охраны.</p>
+    <h1>Подтверждение заявок</h1>
+    <p class="subtitle" id="subtitle">Проверьте заявку, введите код и перешлите на пункт охраны.</p>
   </div>
 </header>
 
 <main>
-  <div class="card" id="content"></div>
+  <div id="list"></div>
 </main>
 
 <div class="toast" id="toast"></div>
@@ -100,7 +100,8 @@
 (function () {
   const $ = (id) => document.getElementById(id);
   const KPP_PHONE = '37122008858'; // ВРЕМЕННО тестовый номер — заменить на реальный WhatsApp поста охраны
-  const CONFIRM_PIN = '5202'; // код подтверждения — знает только Олег. Поменять можно прямо тут, в одну строку.
+  // ЗАМЕНИ на адрес твоего Apps Script веб-приложения (заканчивается на /exec)
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeH8oRpI620YYlDC6_oMVKITTTy4bSe2iS_ipEjPKlqbVNk6p73UhZcHqs-1enBTAu/exec';
 
   function toast(msg) {
     const t = $('toast');
@@ -113,119 +114,111 @@
     const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML;
   }
 
-  function fromToken(token) {
-    try {
-      const b64 = token.replace(/-/g, '+').replace(/_/g, '/');
-      const pad = b64.length % 4 === 0 ? '' : '='.repeat(4 - (b64.length % 4));
-      const json = decodeURIComponent(escape(atob(b64 + pad)));
-      return JSON.parse(json);
-    } catch (e) { return null; }
-  }
-
-  const p = new URLSearchParams(window.location.search);
-  const token = p.get('d');
-  const obj = token ? fromToken(token) : null;
-  const data = obj ? {
-    date: obj.d || '', time: obj.t || '',
-    guest: obj.g || '', plate: obj.p || '', model: obj.m || '',
-    trailer: obj.tr === 1, tplate: obj.tp || '', tmodel: obj.tm || '',
-    purpose: obj.pu || '', resp: obj.r || ''
-  } : { date:'', time:'', guest:'', plate:'', model:'', trailer:false, tplate:'', tmodel:'', purpose:'', resp:'' };
-
-  function buildText() {
+  function buildText(r) {
     const lines = [];
-    lines.push('Дата и время визита: ' + data.date + (data.time ? ', ' + data.time : ''));
-    lines.push('Гость (ФИО / компания): ' + data.guest);
-    lines.push('Транспорт: ' + data.model + ', рег. номер ' + data.plate);
-    if (data.trailer) lines.push('Прицеп: ' + (data.tmodel || '—') + ', рег. номер ' + data.tplate);
-    if (data.purpose) lines.push('Цель визита: ' + data.purpose);
-    lines.push('Заявку подал: ' + data.resp);
+    lines.push('Дата и время визита: ' + r.date + (r.time ? ', ' + r.time : ''));
+    lines.push('Гость (ФИО / компания): ' + r.guest);
+    lines.push('Транспорт: ' + r.model + ', рег. номер ' + r.plate);
+    if (r.trailer) lines.push('Прицеп: ' + (r.trailerModel || '—') + ', рег. номер ' + r.trailerPlate);
+    if (r.purpose) lines.push('Цель визита: ' + r.purpose);
+    lines.push('Заявку подал: ' + r.responsible);
     return lines.join('\n');
   }
 
-  const content = $('content');
-  if (!data.plate && !data.guest) {
-    content.innerHTML = '<div class="empty">Ссылка открыта без данных заявки — откройте её из сообщения с конкретной заявкой.</div>';
-  } else {
-    let html = '<span class="badge-trial">🧪 Пробная версия — пересылка на тестовый номер</span>';
-    html += '<div class="field"><div class="field-label">Дата и время визита</div><div class="field-value">' + esc(data.date) + (data.time ? ', ' + esc(data.time) : '') + '</div></div>';
-    html += '<div class="field"><div class="field-label">Гость</div><div class="field-value">' + esc(data.guest) + '</div></div>';
-    html += '<div class="field"><div class="field-label">Транспорт</div><div class="field-value mono">' + esc(data.plate) + '</div><div class="field-value">' + esc(data.model) + '</div></div>';
-    if (data.trailer) {
-      html += '<div class="field"><div class="field-label">Прицеп</div><div class="field-value mono">' + esc(data.tplate) + '</div><div class="field-value">' + esc(data.tmodel || '—') + '</div></div>';
-    }
-    if (data.purpose) {
-      html += '<div class="field"><div class="field-label">Цель визита</div><div class="field-value">' + esc(data.purpose) + '</div></div>';
-    }
-    html += '<div class="field"><div class="field-label">Заявку подал</div><div class="field-value">' + esc(data.resp) + '</div></div>';
-    content.innerHTML = html;
+  function waUrl(r) {
+    const text = 'Пропуск подтверждён, направляю на КПП:\n' + buildText(r);
+    return 'https://wa.me/' + KPP_PHONE + '?text=' + encodeURIComponent(text);
+  }
 
-    const waLink = document.createElement('a');
-    waLink.className = 'btn btn-go';
-    waLink.id = 'forwardLink';
-    waLink.target = '_top';
-    waLink.rel = 'noopener';
-    waLink.textContent = 'Утвердить и переслать на КПП';
-    waLink.style.display = 'none';
-
-    const pinWrap = document.createElement('div');
-    pinWrap.style.marginTop = '10px';
-    pinWrap.innerHTML =
-      '<div class="field-label" style="margin-bottom:6px;">Код подтверждения</div>' +
-      '<input type="text" inputmode="numeric" id="pinInput" maxlength="8" placeholder="····" ' +
+  function reqCard(r) {
+    let html = '<div class="card" data-id="' + esc(r.id) + '">';
+    html += '<div class="field"><div class="field-label">Дата и время визита</div><div class="field-value">' + esc(r.date) + (r.time ? ', ' + esc(r.time) : '') + '</div></div>';
+    html += '<div class="field"><div class="field-label">Гость</div><div class="field-value">' + esc(r.guest) + '</div></div>';
+    html += '<div class="field"><div class="field-label">Транспорт</div><div class="field-value mono">' + esc(r.plate) + '</div><div class="field-value">' + esc(r.model) + '</div></div>';
+    if (r.trailer) {
+      html += '<div class="field"><div class="field-label">Прицеп</div><div class="field-value mono">' + esc(r.trailerPlate) + '</div><div class="field-value">' + esc(r.trailerModel || '—') + '</div></div>';
+    }
+    if (r.purpose) {
+      html += '<div class="field"><div class="field-label">Цель визита</div><div class="field-value">' + esc(r.purpose) + '</div></div>';
+    }
+    html += '<div class="field"><div class="field-label">Заявку подал</div><div class="field-value">' + esc(r.responsible) + '</div></div>';
+    html += '<div class="field" style="margin-top:14px;">';
+    html += '<div class="field-label" style="margin-bottom:6px;">Код подтверждения</div>';
+    html += '<input type="text" inputmode="numeric" maxlength="8" placeholder="····" data-pin ' +
       'style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;' +
       'padding:12px;font-family:\'IBM Plex Mono\',monospace;font-size:20px;letter-spacing:0.3em;' +
       'text-align:center;color:var(--text);outline:none;">';
-    const pinBtn = document.createElement('button');
-    pinBtn.className = 'btn btn-secondary';
-    pinBtn.textContent = 'Разблокировать';
-    pinWrap.appendChild(pinBtn);
-
-    content.appendChild(pinWrap);
-    content.appendChild(waLink);
-
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'btn btn-secondary';
-    copyBtn.textContent = 'Скопировать текст';
-    content.appendChild(copyBtn);
-
-    const hint = document.createElement('p');
-    hint.className = 'hint';
-    hint.innerHTML = 'Код подтверждения знает только начальник охраны. Без него отправить на КПП нельзя.';
-    content.appendChild(hint);
-
-    function waText() {
-      return 'Пропуск подтверждён, направляю на КПП:\n' + buildText();
-    }
-    function waUrl() {
-      return 'https://wa.me/' + KPP_PHONE + '?text=' + encodeURIComponent(waText());
-    }
-
-    function unlock() {
-      const val = $('pinInput').value.trim();
-      if (val === CONFIRM_PIN) {
-        pinWrap.style.display = 'none';
-        waLink.style.display = 'block';
-        waLink.href = waUrl();
-        toast('Разблокировано');
-      } else {
-        toast('Неверный код');
-        $('pinInput').value = '';
-        $('pinInput').focus();
-      }
-    }
-    pinBtn.addEventListener('click', unlock);
-    pinWrap.querySelector('#pinInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') unlock();
-    });
-
-    waLink.addEventListener('click', () => { waLink.href = waUrl(); });
-
-    copyBtn.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(waText()); toast('Текст скопирован'); }
-      catch (e) { toast('Не удалось скопировать — выделите текст вручную'); }
-    });
+    html += '</div>';
+    html += '<button class="btn btn-go" data-approve>Утвердить и переслать на КПП</button>';
+    html += '</div>';
+    return html;
   }
+
+  let requestsById = {};
+
+  async function load() {
+    $('list').innerHTML = '<div class="empty">Загрузка…</div>';
+    try {
+      const res = await fetch(SCRIPT_URL, { method: 'GET' });
+      const data = await res.json();
+      if (!data.ok) throw new Error('bad response');
+      if (!data.requests.length) {
+        $('list').innerHTML = '<div class="empty">Нет заявок, ожидающих подтверждения.</div>';
+        return;
+      }
+      requestsById = {};
+      data.requests.forEach(r => { requestsById[r.id] = r; });
+      $('list').innerHTML = data.requests.map(reqCard).join('');
+    } catch (e) {
+      $('list').innerHTML = '<div class="empty">Не удалось загрузить список. Проверьте связь и перезагрузите страницу.</div>';
+      console.error(e);
+    }
+  }
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-approve]');
+    if (!btn) return;
+    const card = btn.closest('.card');
+    const id = card.dataset.id;
+    const pin = card.querySelector('[data-pin]').value.trim();
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'approve', id: id, pin: pin })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const r = requestsById[id];
+        const a = document.createElement('a');
+        a.href = waUrl(r);
+        a.target = '_top';
+        a.rel = 'noopener';
+        a.click();
+        toast('Утверждено — открываю WhatsApp');
+        load();
+      } else if (data.error === 'wrong_pin') {
+        toast('Неверный код');
+        card.querySelector('[data-pin]').value = '';
+        card.querySelector('[data-pin]').focus();
+        btn.disabled = false;
+        btn.textContent = 'Утвердить и переслать на КПП';
+      } else {
+        toast('Ошибка — попробуйте ещё раз');
+        btn.disabled = false;
+        btn.textContent = 'Утвердить и переслать на КПП';
+      }
+    } catch (err) {
+      console.error(err);
+      toast('Нет связи с сервером');
+      btn.disabled = false;
+      btn.textContent = 'Утвердить и переслать на КПП';
+    }
+  });
+
+  load();
 })();
 </script>
 

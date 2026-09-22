@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Статус заявок — BMGS Tvaika 27</title>
+<meta property="og:title" content="Статус заявок — BMGS Tvaika 27">
+<meta property="og:description" content="Список заявок на въезд и их статус">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f3; --surface: #ffffff; --surface-2: #f4f6f7; --border: #d8dee2;
+    --text: #1b2226; --text-muted: #647079;
+    --pending: #b8863a; --pending-bg: #fbf1de;
+    --approved: #2f8f5b; --approved-bg: #e6f5ec;
+    --accent: #3a6fa8;
+    --stripe-a: #1b2226; --stripe-b: #d99a3d;
+    --shadow: 0 1px 2px rgba(20,26,30,0.06), 0 4px 14px rgba(20,26,30,0.05);
+    --radius: 12px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12171b; --surface: #1a2127; --surface-2: #212a31; --border: #303b43;
+      --text: #e9edf0; --text-muted: #93a1aa;
+      --pending: #d9a54a; --pending-bg: #362a13;
+      --approved: #4fb47e; --approved-bg: #143223;
+      --accent: #6ea3d6;
+      --stripe-a: #0c0f11; --stripe-b: #d9a54a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12171b; --surface: #1a2127; --surface-2: #212a31; --border: #303b43;
+    --text: #e9edf0; --text-muted: #93a1aa;
+    --pending: #d9a54a; --pending-bg: #362a13;
+    --approved: #4fb47e; --approved-bg: #143223;
+    --accent: #6ea3d6;
+    --stripe-a: #0c0f11; --stripe-b: #d9a54a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.35);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); min-height: 100%; }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+  .stripes { height: 6px; width: 100%;
+    background: repeating-linear-gradient(-45deg, var(--stripe-b), var(--stripe-b) 14px, var(--stripe-a) 14px, var(--stripe-a) 28px); }
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .header-inner { padding: 16px 18px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  h1 { margin: 0 0 3px; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+  .subtitle { margin: 0; font-size: 13px; color: var(--text-muted); }
+  .refresh-btn { appearance: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+    border-radius: 999px; padding: 8px 14px; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+  main { max-width: 620px; margin: 0 auto; padding: 16px 14px 48px; }
+  .req { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+    box-shadow: var(--shadow); padding: 14px 14px 12px; margin-bottom: 10px; }
+  .req-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .plate { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 16px; letter-spacing: 0.03em; }
+  .chip { font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+  .chip-pending { color: var(--pending); background: var(--pending-bg); }
+  .chip-approved { color: var(--approved); background: var(--approved-bg); }
+  .req-meta { margin-top: 7px; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .req-meta b { color: var(--text); font-weight: 600; }
+  .btn-nudge { appearance: none; border: none; border-radius: 9px; padding: 10px 14px; font-family: inherit;
+    font-weight: 700; font-size: 13.5px; cursor: pointer; width: 100%; margin-top: 10px;
+    background: #3fa76b; color: #fff; display: block; text-align: center; text-decoration: none; }
+  .empty { text-align: center; padding: 40px 16px; color: var(--text-muted); }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 20px 0 8px 2px; }
+  .section-label:first-child { margin-top: 0; }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: var(--bg); padding: 11px 18px; border-radius: 999px; font-size: 13.5px; font-weight: 700;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 50; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .export-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 14px; margin-bottom: 16px; }
+  .export-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .export-row select, .export-row input[type="date"] {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 10px; font-family: 'Manrope', sans-serif; font-size: 13.5px; color: var(--text); }
+  .export-row select { flex: 1; min-width: 140px; }
+  .custom-dates { display: none; gap: 8px; margin-top: 8px; }
+  .custom-dates.show { display: flex; }
+  .custom-dates input { flex: 1; }
+  .btn-export { appearance: none; border: none; border-radius: 9px; padding: 11px 14px; font-family: inherit;
+    font-weight: 700; font-size: 13.5px; cursor: pointer; width: 100%; margin-top: 10px;
+    background: var(--text); color: var(--bg); }
+
+  #printArea { display: none; }
+  @media print {
+    header, .export-card, .req, .section-label, .toast { display: none !important; }
+    main { max-width: none; padding: 0; }
+    #printArea.show { display: block; }
+    #printArea table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    #printArea th, #printArea td { border: 1px solid #999; padding: 5px 6px; text-align: left; vertical-align: top; }
+    #printArea th { background: #eee; }
+    #printArea h2 { font-size: 15px; margin: 0 0 2px; }
+    #printArea .meta { font-size: 11px; color: #555; margin-bottom: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="stripes"></div>
+  <div class="header-inner">
+    <div>
+      <h1>Статус заявок</h1>
+      <p class="subtitle">BMGS Tvaika 27 — все заявки и их состояние</p>
+    </div>
+    <button class="refresh-btn" id="refreshBtn">Обновить</button>
+  </div>
+</header>
+
+<main>
+  <div class="export-card">
+    <div class="export-row">
+      <select id="rangeSelect">
+        <option value="week">Последняя неделя</option>
+        <option value="month" selected>Текущий месяц</option>
+        <option value="all">Весь период</option>
+        <option value="custom">Свой период…</option>
+      </select>
+    </div>
+    <div class="custom-dates" id="customDates">
+      <input type="date" id="dateFrom">
+      <input type="date" id="dateTo">
+    </div>
+    <button class="btn-export" id="exportBtn">Скачать / Распечатать (PDF)</button>
+  </div>
+
+  <div class="section-label" id="pendingLabel" style="display:none">В рассмотрении</div>
+  <div id="pendingList"></div>
+  <div class="section-label" id="approvedLabel" style="display:none">Утверждено</div>
+  <div id="approvedList"></div>
+</main>
+
+<div id="printArea">
+  <h2>Заявки на въезд — BMGS Tvaika 27</h2>
+  <div class="meta" id="printMeta"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Дата</th><th>Время</th><th>Гость</th><th>Транспорт</th><th>Прицеп</th>
+        <th>Цель</th><th>Подал</th><th>Статус</th><th>Утверждено</th>
+      </tr>
+    </thead>
+    <tbody id="printBody"></tbody>
+  </table>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  // ЗАМЕНИ на адрес твоего Apps Script веб-приложения (заканчивается на /exec)
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeH8oRpI620YYlDC6_oMVKITTTy4bSe2iS_ipEjPKlqbVNk6p73UhZcHqs-1enBTAu/exec';
+  const WA_PHONE = '37122008858'; // Олег — на время теста тот же номер, что и в форме заявки
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._h);
+    toast._h = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function esc(s) {
+    const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML;
+  }
+
+  function chip(status) {
+    return status === 'approved'
+      ? '<span class="chip chip-approved">Утверждено</span>'
+      : '<span class="chip chip-pending">В рассмотрении</span>';
+  }
+
+  function nudgeUrl(r) {
+    const text = 'Напоминание: заявка на въезд ещё ждёт подтверждения.\n' +
+      'Дата: ' + r.date + ', ' + r.time + '\n' +
+      'Гость: ' + r.guest + '\n' +
+      'Транспорт: ' + r.model + ', рег. номер ' + r.plate + '\n' +
+      'Заявку подал: ' + r.responsible;
+    return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(text);
+  }
+
+  function reqCard(r) {
+    let html = '<div class="req">';
+    html += '<div class="req-top"><div class="plate">' + esc(r.plate) + '</div>' + chip(r.status) + '</div>';
+    html += '<div class="req-meta"><b>' + esc(r.guest) + '</b> · ' + esc(r.model) + '</div>';
+    html += '<div class="req-meta">' + esc(r.date) + ', ' + esc(r.time) + ' · подал ' + esc(r.responsible) + '</div>';
+    if (r.status === 'pending') {
+      html += '<a class="btn-nudge" href="' + nudgeUrl(r) + '" target="_top" rel="noopener">Напомнить Олегу</a>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  let allRequests = [];
+
+  function parseDate(dmy) {
+    // dmy: "DD.MM.YYYY"
+    const [d, m, y] = dmy.split('.').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  $('rangeSelect').addEventListener('change', () => {
+    $('customDates').classList.toggle('show', $('rangeSelect').value === 'custom');
+  });
+
+  function getRange() {
+    const mode = $('rangeSelect').value;
+    const now = new Date();
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    if (mode === 'week') {
+      const from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+      return { from: from, to: todayEnd, label: 'последние 7 дней' };
+    }
+    if (mode === 'month') {
+      const from = new Date(now.getFullYear(), now.getMonth(), 1);
+      return { from: from, to: todayEnd, label: 'текущий месяц' };
+    }
+    if (mode === 'custom') {
+      const fromVal = $('dateFrom').value, toVal = $('dateTo').value;
+      const from = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+      const to = toVal ? new Date(toVal + 'T23:59:59') : todayEnd;
+      return { from: from, to: to, label: (fromVal || '…') + ' — ' + (toVal || '…') };
+    }
+    return { from: null, to: null, label: 'весь период' };
+  }
+
+  function exportPrint() {
+    const range = getRange();
+    let rows = allRequests.slice();
+    if (range.from) rows = rows.filter(r => parseDate(r.date) >= range.from);
+    if (range.to) rows = rows.filter(r => parseDate(r.date) <= range.to);
+    rows.sort((a, b) => parseDate(a.date) - parseDate(b.date) || (a.time < b.time ? -1 : 1));
+
+    if (!rows.length) {
+      toast('Нет заявок за выбранный период');
+      return;
+    }
+
+    $('printMeta').textContent = 'Период: ' + range.label + ' · сформировано ' +
+      new Date().toLocaleDateString('ru-RU') + ' ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) +
+      ' · всего заявок: ' + rows.length;
+
+    $('printBody').innerHTML = rows.map(r =>
+      '<tr>' +
+      '<td>' + esc(r.date) + '</td>' +
+      '<td>' + esc(r.time) + '</td>' +
+      '<td>' + esc(r.guest) + '</td>' +
+      '<td>' + esc(r.model) + ' ' + esc(r.plate) + '</td>' +
+      '<td>' + (r.trailer ? esc(r.trailerModel) + ' ' + esc(r.trailerPlate) : '—') + '</td>' +
+      '<td>' + esc(r.purpose || '—') + '</td>' +
+      '<td>' + esc(r.responsible) + '</td>' +
+      '<td>' + (r.status === 'approved' ? 'Утверждено' : 'В рассмотрении') + '</td>' +
+      '<td>' + (r.approvedAt ? esc(String(r.approvedAt).slice(0, 16)) : '—') + '</td>' +
+      '</tr>'
+    ).join('');
+
+    document.getElementById('printArea').classList.add('show');
+    window.print();
+  }
+
+  $('exportBtn').addEventListener('click', exportPrint);
+
+  async function load() {
+    $('refreshBtn').textContent = '...';
+    try {
+      const res = await fetch(SCRIPT_URL + '?mode=all', { method: 'GET' });
+      const data = await res.json();
+      if (!data.ok) throw new Error('bad response');
+      allRequests = data.requests;
+      const pending = data.requests.filter(r => r.status === 'pending');
+      const approved = data.requests.filter(r => r.status === 'approved');
+
+      $('pendingLabel').style.display = pending.length ? 'block' : 'none';
+      $('pendingList').innerHTML = pending.length ? pending.map(reqCard).join('') :
+        '<div class="empty">Нет заявок в ожидании.</div>';
+
+      $('approvedLabel').style.display = approved.length ? 'block' : 'none';
+      $('approvedList').innerHTML = approved.length ? approved.map(reqCard).join('') : '';
+    } catch (e) {
+      $('pendingList').innerHTML = '<div class="empty">Не удалось загрузить список. Проверьте связь и нажмите «Обновить».</div>';
+      console.error(e);
+    }
+    $('refreshBtn').textContent = 'Обновить';
+  }
+
+  $('refreshBtn').addEventListener('click', load);
+  load();
+})();
+</script>
+
+</body>
+</html>

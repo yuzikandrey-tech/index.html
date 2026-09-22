@@ -162,6 +162,9 @@
   const $ = (id) => document.getElementById(id);
   const RECIPIENT = 'dezar@kront.eu';
   const WA_PHONE = '37122008858'; // тестовый номер (Андрей) — на время пробного запуска
+  // ЗАМЕНИ на адрес твоего Apps Script веб-приложения (заканчивается на /exec)
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeH8oRpI620YYlDC6_oMVKITTTy4bSe2iS_ipEjPKlqbVNk6p73UhZcHqs-1enBTAu/exec';
+  const CONFIRM_URL = 'https://yuzikandrey-tech.github.io/index.html/propusk-vezd/confirm.html';
 
   function toast(msg) {
     const t = $('toast');
@@ -222,49 +225,86 @@
     return lines.join('\n');
   }
 
-  const CONFIRM_URL = 'https://yuzikandrey-tech.github.io/index.html/propusk-vezd/confirm.html';
-
-  // Compact, url-safe token instead of a long readable ?guest=...&purpose=...
-  // query string — carries the same data, just as one opaque code.
-  function toToken(obj) {
-    const json = JSON.stringify(obj);
-    const b64 = btoa(unescape(encodeURIComponent(json)));
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
-
-  function buildConfirmLink() {
-    const obj = {
-      d: fmtDate($('f-date').value),
-      t: $('f-time').value,
-      g: $('f-guest').value.trim(),
-      p: $('f-plate').value.trim(),
-      m: $('f-model').value.trim(),
-      pu: $('f-purpose').value.trim(),
-      r: $('f-responsible').value.trim()
-    };
-    if (hasTrailer.checked) {
-      obj.tr = 1;
-      obj.tp = $('f-trailer-plate').value.trim();
-      obj.tm = $('f-trailer-model').value.trim();
-    }
-    return CONFIRM_URL + '?d=' + toToken(obj);
+  function submitToBackend(payload) {
+    return fetch(SCRIPT_URL, {
+      method: 'POST',
+      // text/plain avoids a CORS preflight that Apps Script doesn't handle —
+      // the body is still valid JSON, just sent without the extra browser check.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(r => r.json());
   }
 
   function buildMailto() {
     const subject = 'Заявка на въезд — ' + $('f-plate').value.trim() + ' — ' + fmtDate($('f-date').value);
-    const body = buildText() + '\n\nПодтвердить и переслать на КПП: ' + buildConfirmLink() + '\n\n— отправлено через форму заявок на въезд (тест)';
+    const body = buildText() + '\n\n— отправлено через форму заявок на въезд (тест)';
     return 'mailto:' + RECIPIENT + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   }
 
+  function buildWhatsappText() {
+    const lines = [];
+    lines.push('*Заявка на въезд — BMGS Tvaika 27*');
+    lines.push('');
+    lines.push('*Дата и время визита:*');
+    lines.push(fmtDate($('f-date').value) + ', ' + $('f-time').value);
+    lines.push('');
+    lines.push('*Гость:*');
+    lines.push($('f-guest').value.trim());
+    lines.push('');
+    lines.push('*Транспорт:*');
+    lines.push($('f-model').value.trim() + ', рег. номер ' + $('f-plate').value.trim());
+    if (hasTrailer.checked) {
+      lines.push('');
+      lines.push('*Прицеп:*');
+      lines.push(($('f-trailer-model').value.trim() || '—') + ', рег. номер ' + $('f-trailer-plate').value.trim());
+    }
+    if ($('f-purpose').value.trim()) {
+      lines.push('');
+      lines.push('*Цель визита:*');
+      lines.push($('f-purpose').value.trim());
+    }
+    lines.push('');
+    lines.push('*Заявку подал:*');
+    lines.push($('f-responsible').value.trim());
+    lines.push('');
+    lines.push('Открыть список заявок на подтверждение:');
+    lines.push(CONFIRM_URL);
+    return lines.join('\n');
+  }
+
   function buildWhatsapp() {
-    const text = 'Заявка на въезд (BMGS Tvaika 27):\n' + buildText() + '\n\nПодтвердить и переслать на КПП: ' + buildConfirmLink();
-    return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(text);
+    return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(buildWhatsappText());
   }
 
   let lastMailto = '';
   let lastWa = '';
 
-  $('f-submit').addEventListener('click', () => {
+  $('f-submit').addEventListener('click', async () => {
+    const btn = $('f-submit');
+    btn.disabled = true;
+    btn.textContent = 'Сохраняю...';
+    try {
+      await submitToBackend({
+        action: 'submit',
+        date: fmtDate($('f-date').value),
+        time: $('f-time').value,
+        guest: $('f-guest').value.trim(),
+        plate: $('f-plate').value.trim(),
+        model: $('f-model').value.trim(),
+        trailer: hasTrailer.checked,
+        trailerPlate: hasTrailer.checked ? $('f-trailer-plate').value.trim() : '',
+        trailerModel: hasTrailer.checked ? $('f-trailer-model').value.trim() : '',
+        purpose: $('f-purpose').value.trim(),
+        responsible: $('f-responsible').value.trim()
+      });
+    } catch (e) {
+      console.error(e);
+      toast('Не удалось сохранить заявку — проверьте связь и попробуйте ещё раз');
+      btn.disabled = false;
+      btn.textContent = 'Подготовить письмо';
+      return;
+    }
+
     lastMailto = buildMailto();
     lastWa = buildWhatsapp();
     $('resultText').textContent = 'Кому: WhatsApp +371 22008858 (тест) или ' + RECIPIENT + '\n\n' + buildText();
@@ -272,12 +312,12 @@
     $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     $('openWaLink').href = lastWa;
     $('openMailLink').href = lastMailto;
-    // Fire a real anchor click straight away — wa.me is a plain https link,
-    // which sandboxed viewers hand off to the WhatsApp app far more
-    // reliably than a mailto: link (a custom scheme many viewers block).
     const wa = $('openWaLink');
     wa.href = lastWa;
     wa.click();
+
+    btn.disabled = false;
+    btn.textContent = 'Подготовить письмо';
   });
 
   $('openWaLink').addEventListener('click', (e) => {
